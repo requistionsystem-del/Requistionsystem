@@ -1,0 +1,864 @@
+<!doctype doctype>
+<html lang="th">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบเบิกจ่ายวัสดุและคลังพัสดุ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, onSnapshot, query, orderBy, getDoc, increment } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3hnlQ_hXg6gDn3EYlFmcIBLoPAiwwt0w",
+            authDomain: "requistionsystem-33881.firebaseapp.com",
+            projectId: "requistionsystem-33881",
+            storageBucket: "requistionsystem-33881.firebasestorage.app",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:fc4bf066a367d9f637dc7b",
+            measurementId: "G-M3N19WESNP"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.db = db;
+        window.firestoreModules = { collection, addDoc, getDocs, updateDoc, doc, onSnapshot, query, orderBy, getDoc, increment };
+
+        console.log('Firebase initialized successfully');
+    </script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+        body {
+            box-sizing: border-box;
+            font-family: 'Sarabun', sans-serif;
+        }
+        
+        * {
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .toast.warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .sidebar-item {
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-item:hover {
+            transform: translateX(4px);
+        }
+
+        .card {
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .input-field {
+            transition: all 0.2s ease;
+        }
+
+        .input-field:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-primary {
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .loading-spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .stat-card-2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-card-3 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-card-4 {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="bg-gray-50">
+  <div class="flex h-full min-h-screen"><!-- Sidebar -->
+   <div id="sidebar" class="w-64 bg-gradient-to-b from-indigo-900 to-indigo-800 text-white p-6 shadow-2xl hidden">
+    <div class="mb-8">
+     <h1 class="text-2xl font-bold mb-2">📦 ระบบเบิกจ่ายวัสดุ</h1>
+     <p class="text-indigo-200 text-sm" id="institutionName">วิทยาลัยเทคโนโลยี</p>
+    </div>
+    <div class="mb-6 p-4 bg-white bg-opacity-10 rounded-lg">
+     <p class="text-sm text-indigo-200 mb-1">ผู้ใช้งาน</p>
+     <p class="font-semibold">👤 Admin</p>
+    </div>
+    <nav class="space-y-2"><button onclick="showPage('dashboard')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-20 flex items-center space-x-3"> <span class="text-xl">📊</span> <span>แดชบอร์ด</span> </button> <button onclick="showPage('addStock')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-20 flex items-center space-x-3"> <span class="text-xl">➕</span> <span>เพิ่มสต็อกวัสดุ</span> </button> <button onclick="showPage('requisition')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-20 flex items-center space-x-3"> <span class="text-xl">📋</span> <span>เบิกวัสดุ</span> </button> <button onclick="showPage('history')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-20 flex items-center space-x-3"> <span class="text-xl">📜</span> <span>ประวัติการเบิก</span> </button> <button onclick="showPage('statistics')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-20 flex items-center space-x-3"> <span class="text-xl">📈</span> <span>สถิติ</span> </button>
+    </nav>
+    <div class="absolute bottom-6 left-6 right-6"><button onclick="logout()" class="w-full px-4 py-3 bg-red-600 hover:bg-red-700 rounded-lg flex items-center justify-center space-x-2 transition"> <span>🚪</span> <span>ออกจากระบบ</span> </button>
+    </div>
+   </div><!-- Main Content -->
+   <div class="flex-1 overflow-auto"><!-- Login Page -->
+    <div id="loginPage" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-4">
+     <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+      <div class="text-center mb-8">
+       <div class="text-6xl mb-4">
+        🔐
+       </div>
+       <h2 class="text-3xl font-bold text-gray-800 mb-2">เข้าสู่ระบบ</h2>
+       <p class="text-gray-600" id="systemName">ระบบเบิกจ่ายวัสดุและคลังพัสดุ</p>
+      </div>
+      <form id="loginForm" onsubmit="handleLogin(event)">
+       <div class="mb-4"><label class="block text-gray-700 font-semibold mb-2">ชื่อผู้ใช้</label> <input type="text" id="username" class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500" placeholder="Admin" required>
+       </div>
+       <div class="mb-6"><label class="block text-gray-700 font-semibold mb-2">รหัสผ่าน</label> <input type="password" id="password" class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500" placeholder="Admin1234" required>
+       </div><button type="submit" class="btn-primary w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700"> เข้าสู่ระบบ </button>
+      </form>
+      <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+       <p class="text-sm text-gray-600 text-center"><strong>ข้อมูลทดสอบ:</strong><br>
+         ชื่อผู้ใช้: Admin<br>
+         รหัสผ่าน: Admin1234</p>
+      </div>
+     </div>
+    </div><!-- Dashboard Page -->
+    <div id="dashboardPage" class="p-6 hidden">
+     <h2 class="text-3xl font-bold text-gray-800 mb-6">📊 แดชบอร์ด</h2>
+     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="stat-card text-white p-6 rounded-xl shadow-lg">
+       <div class="flex justify-between items-start mb-4">
+        <div>
+         <p class="text-white text-opacity-90 text-sm mb-1">วัสดุทั้งหมด</p>
+         <p class="text-4xl font-bold" id="totalItems">0</p>
+        </div>
+        <div class="text-4xl">
+         📦
+        </div>
+       </div>
+      </div>
+      <div class="stat-card-2 text-white p-6 rounded-xl shadow-lg">
+       <div class="flex justify-between items-start mb-4">
+        <div>
+         <p class="text-white text-opacity-90 text-sm mb-1">รายการเบิกวันนี้</p>
+         <p class="text-4xl font-bold" id="todayRequisitions">0</p>
+        </div>
+        <div class="text-4xl">
+         📋
+        </div>
+       </div>
+      </div>
+      <div class="stat-card-3 text-white p-6 rounded-xl shadow-lg">
+       <div class="flex justify-between items-start mb-4">
+        <div>
+         <p class="text-white text-opacity-90 text-sm mb-1">แผนกคอมพิวเตอร์</p>
+         <p class="text-4xl font-bold" id="computerItems">0</p>
+        </div>
+        <div class="text-4xl">
+         💻
+        </div>
+       </div>
+      </div>
+      <div class="stat-card-4 text-white p-6 rounded-xl shadow-lg">
+       <div class="flex justify-between items-start mb-4">
+        <div>
+         <p class="text-white text-opacity-90 text-sm mb-1">แผนกอิเล็กทรอนิกส์</p>
+         <p class="text-4xl font-bold" id="electronicItems">0</p>
+        </div>
+        <div class="text-4xl">
+         ⚡
+        </div>
+       </div>
+      </div>
+     </div>
+     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white rounded-xl shadow-lg p-6">
+       <h3 class="text-xl font-bold text-gray-800 mb-4">🔔 วัสดุใกล้หมด (น้อยกว่า 10 ชิ้น)</h3>
+       <div id="lowStockList" class="space-y-2">
+        <p class="text-gray-500 text-center py-4">ไม่มีวัสดุที่ใกล้หมด</p>
+       </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-lg p-6">
+       <h3 class="text-xl font-bold text-gray-800 mb-4">⭐ วัสดุยอดนิยม</h3>
+       <div id="popularItemsList" class="space-y-2">
+        <p class="text-gray-500 text-center py-4">ยังไม่มีข้อมูล</p>
+       </div>
+      </div>
+     </div>
+    </div><!-- Add Stock Page -->
+    <div id="addStockPage" class="p-6 hidden">
+     <h2 class="text-3xl font-bold text-gray-800 mb-6">➕ เพิ่มสต็อกวัสดุ</h2>
+     <div class="bg-white rounded-xl shadow-lg p-6 max-w-2xl">
+      <form id="addStockForm" onsubmit="handleAddStock(event)">
+       <div class="mb-4"><label class="block text-gray-700 font-semibold mb-2">ชื่อวัสดุ <span class="text-red-500">*</span></label> <input type="text" id="materialName" class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500" placeholder="เช่น กระดาษ A4, ปากกา" required>
+       </div>
+       <div class="mb-4"><label class="block text-gray-700 font-semibold mb-2">จำนวน <span class="text-red-500">*</span></label> <input type="number" id="materialQuantity" min="1" class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500" placeholder="จำนวนที่ต้องการเพิ่ม" required>
+       </div>
+       <div class="mb-6"><label class="block text-gray-700 font-semibold mb-2">แผนก <span class="text-red-500">*</span></label> <select id="materialDepartment" class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500" required> <option value="">-- เลือกแผนก --</option> <option value="แผนกเทคโนโลยีคอมพิวเตอร์">💻 แผนกเทคโนโลยีคอมพิวเตอร์</option> <option value="แผนกอิเล็กทรอนิกส์">⚡ แผนกอิเล็กทรอนิกส์</option> </select>
+       </div><button type="submit" class="btn-primary w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-600 flex items-center justify-center"> <span id="addStockBtnText">➕ เพิ่มวัสดุเข้าสต็อก</span>
+        <div id="addStockSpinner" class="loading-spinner ml-2 hidden"></div></button>
+      </form>
+     </div>
+     <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">📦 รายการวัสดุทั้งหมด</h3>
+      <div class="overflow-x-auto">
+       <table class="w-full">
+        <thead class="bg-gray-100">
+         <tr>
+          <th class="px-4 py-3 text-left font-semibold text-gray-700">ชื่อวัสดุ</th>
+          <th class="px-4 py-3 text-left font-semibold text-gray-700">จำนวนคงเหลือ</th>
+          <th class="px-4 py-3 text-left font-semibold text-gray-700">แผนก</th>
+          <th class="px-4 py-3 text-left font-semibold text-gray-700">อัพเดทล่าสุด</th>
+         </tr>
+        </thead>
+        <tbody id="stockTableBody">
+         <tr>
+          <td colspan="4" class="px-4 py-8 text-center text-gray-500">กำลังโหลดข้อมูล...</td>
+         </tr>
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </div><!-- Requisition Page -->
+    <div id="requisitionPage" class="p-6 hidden">
+     <h2 class="text-3xl font-bold text-gray-800 mb-6">📋 เบิกวัสดุ</h2>
+     <div class="bg-white rounded-xl shadow-lg p-6 max-w-2xl">
+      <form id="requisitionForm" onsubmit="handleRequisition(event)">
+       <div class="mb-4"><label class="block text-gray-700 font-semibold mb-2">ชื่อผู้เบิก <span class="text-red-500">*</span></label> <input type="text" id="requesterName" class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500" placeholder="กรอกชื่อ-นามสกุล" required>
+       </div>
+       <div class="mb-4"><label class="block text-gray-700 font-semibold mb-2">เลือกแผนก <span class="text-red-500">*</span></label> <select id="reqDepartment" class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500" onchange="loadMaterialsByDepartment()" required> <option value="">-- เลือกแผนก --</option> <option value="แผนกเทคโนโลยีคอมพิวเตอร์">💻 แผนกเทคโนโลยีคอมพิวเตอร์</option> <option value="แผนกอิเล็กทรอนิกส์">⚡ แผนกอิเล็กทรอนิกส์</option> </select>
+       </div>
+       <div class="mb-4"><label class="block text-gray-700 font-semibold mb-2">เลือกวัสดุ <span class="text-red-500">*</span></label> <select id="reqMaterial" class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500" onchange="showAvailableQuantity()" required> <option value="">-- เลือกวัสดุ --</option> </select>
+        <p id="availableQuantity" class="mt-2 text-sm text-gray-600"></p>
+       </div>
+       <div class="mb-6"><label class="block text-gray-700 font-semibold mb-2">จำนวนที่ต้องการเบิก <span class="text-red-500">*</span></label> <input type="number" id="reqQuantity" min="1" class="input-field w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500" placeholder="ระบุจำนวน" required>
+       </div><button type="submit" class="btn-primary w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-600 flex items-center justify-center"> <span id="reqBtnText">📋 ยืนยันการเบิก</span>
+        <div id="reqSpinner" class="loading-spinner ml-2 hidden"></div></button>
+      </form>
+     </div>
+    </div><!-- History Page -->
+    <div id="historyPage" class="p-6 hidden">
+     <div class="flex justify-between items-center mb-6">
+      <h2 class="text-3xl font-bold text-gray-800">📜 ประวัติการเบิกวัสดุ</h2><button onclick="exportToExcel()" class="btn-primary bg-gradient-to-r from-green-600 to-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-600 flex items-center space-x-2"> <span>📥</span> <span>ส่งออก Excel</span> </button>
+     </div>
+     <div class="bg-white rounded-xl shadow-lg p-6">
+      <div class="overflow-x-auto">
+       <table class="w-full">
+        <thead class="bg-gray-100">
+         <tr>
+          <th class="px-4 py-3 text-left font-semibold text-gray-700">วันที่</th>
+          <th class="px-4 py-3 text-left font-semibold text-gray-700">เวลา</th>
+          <th class="px-4 py-3 text-left font-semibold text-gray-700">ผู้เบิก</th>
+          <th class="px-4 py-3 text-left font-semibold text-gray-700">วัสดุ</th>
+          <th class="px-4 py-3 text-left font-semibold text-gray-700">แผนก</th>
+          <th class="px-4 py-3 text-left font-semibold text-gray-700">จำนวน</th>
+         </tr>
+        </thead>
+        <tbody id="historyTableBody">
+         <tr>
+          <td colspan="6" class="px-4 py-8 text-center text-gray-500">กำลังโหลดข้อมูล...</td>
+         </tr>
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </div><!-- Statistics Page -->
+    <div id="statisticsPage" class="p-6 hidden">
+     <h2 class="text-3xl font-bold text-gray-800 mb-6">📈 สถิติและรายงาน</h2>
+     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white rounded-xl shadow-lg p-6">
+       <h3 class="text-xl font-bold text-gray-800 mb-4">📊 วัสดุคงเหลือน้อยที่สุด 5 อันดับ</h3>
+       <canvas id="lowStockChart"></canvas>
+      </div>
+      <div class="bg-white rounded-xl shadow-lg p-6">
+       <h3 class="text-xl font-bold text-gray-800 mb-4">🔥 พัสดุที่ถูกเบิกมากที่สุด</h3>
+       <canvas id="popularChart"></canvas>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+        const defaultConfig = {
+            system_name: "ระบบเบิกจ่ายวัสดุและคลังพัสดุ",
+            institution_name: "วิทยาลัยเทคโนโลยี",
+            primary_color: "#4f46e5",
+            secondary_color: "#8b5cf6",
+            background_color: "#f9fafb",
+            text_color: "#1f2937",
+            accent_color: "#10b981"
+        };
+
+        let currentMaterials = [];
+        let currentRequisitions = [];
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === 'Admin' && password === 'Admin1234') {
+                showToast('เข้าสู่ระบบสำเร็จ! 🎉', 'success');
+                setTimeout(() => {
+                    document.getElementById('loginPage').classList.add('hidden');
+                    document.getElementById('sidebar').classList.remove('hidden');
+                    showPage('dashboard');
+                    loadAllData();
+                }, 500);
+            } else {
+                showToast('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'error');
+            }
+        }
+
+        function logout() {
+            showToast('ออกจากระบบสำเร็จ', 'success');
+            setTimeout(() => {
+                document.getElementById('sidebar').classList.add('hidden');
+                document.getElementById('loginPage').classList.remove('hidden');
+                document.getElementById('dashboardPage').classList.add('hidden');
+                document.getElementById('addStockPage').classList.add('hidden');
+                document.getElementById('requisitionPage').classList.add('hidden');
+                document.getElementById('historyPage').classList.add('hidden');
+                document.getElementById('statisticsPage').classList.add('hidden');
+                document.getElementById('loginForm').reset();
+            }, 500);
+        }
+
+        function showPage(pageName) {
+            const pages = ['dashboardPage', 'addStockPage', 'requisitionPage', 'historyPage', 'statisticsPage'];
+            pages.forEach(page => {
+                document.getElementById(page).classList.add('hidden');
+            });
+            document.getElementById(pageName + 'Page').classList.remove('hidden');
+
+            if (pageName === 'statistics') {
+                setTimeout(() => {
+                    updateStatisticsCharts();
+                }, 100);
+            }
+        }
+
+        async function loadAllData() {
+            try {
+                const { collection, getDocs, query, orderBy } = window.firestoreModules;
+                
+                const materialsSnapshot = await getDocs(collection(window.db, 'materials'));
+                currentMaterials = materialsSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                const requisitionsSnapshot = await getDocs(
+                    query(collection(window.db, 'requisitions'), orderBy('timestamp', 'desc'))
+                );
+                currentRequisitions = requisitionsSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                updateDashboard();
+                updateStockTable();
+                updateHistoryTable();
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showToast('เกิดข้อผิดพลาดในการโหลดข้อมูล', 'error');
+            }
+        }
+
+        function updateDashboard() {
+            document.getElementById('totalItems').textContent = currentMaterials.length;
+            
+            const today = new Date().toLocaleDateString('th-TH');
+            const todayReqs = currentRequisitions.filter(req => {
+                const reqDate = new Date(req.timestamp).toLocaleDateString('th-TH');
+                return reqDate === today;
+            });
+            document.getElementById('todayRequisitions').textContent = todayReqs.length;
+
+            const computerItems = currentMaterials.filter(m => m.department === 'แผนกเทคโนโลยีคอมพิวเตอร์');
+            const electronicItems = currentMaterials.filter(m => m.department === 'แผนกอิเล็กทรอนิกส์');
+            
+            document.getElementById('computerItems').textContent = computerItems.length;
+            document.getElementById('electronicItems').textContent = electronicItems.length;
+
+            const lowStock = currentMaterials.filter(m => m.quantity < 10).sort((a, b) => a.quantity - b.quantity);
+            const lowStockList = document.getElementById('lowStockList');
+            
+            if (lowStock.length === 0) {
+                lowStockList.innerHTML = '<p class="text-gray-500 text-center py-4">ไม่มีวัสดุที่ใกล้หมด</p>';
+            } else {
+                lowStockList.innerHTML = lowStock.map(item => `
+                    <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
+                        <div>
+                            <p class="font-semibold text-gray-800">${item.name}</p>
+                            <p class="text-sm text-gray-600">${item.department}</p>
+                        </div>
+                        <span class="text-red-600 font-bold">${item.quantity} ชิ้น</span>
+                    </div>
+                `).join('');
+            }
+
+            const materialReqCount = {};
+            currentRequisitions.forEach(req => {
+                materialReqCount[req.materialName] = (materialReqCount[req.materialName] || 0) + req.quantity;
+            });
+
+            const popularItems = Object.entries(materialReqCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+
+            const popularList = document.getElementById('popularItemsList');
+            
+            if (popularItems.length === 0) {
+                popularList.innerHTML = '<p class="text-gray-500 text-center py-4">ยังไม่มีข้อมูล</p>';
+            } else {
+                popularList.innerHTML = popularItems.map(([name, count], index) => `
+                    <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-2xl font-bold text-green-600">#${index + 1}</span>
+                            <p class="font-semibold text-gray-800">${name}</p>
+                        </div>
+                        <span class="text-green-600 font-bold">${count} ครั้ง</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updateStockTable() {
+            const tbody = document.getElementById('stockTableBody');
+            
+            if (currentMaterials.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">ยังไม่มีรายการวัสดุ</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = currentMaterials.map(item => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-4 py-3 font-semibold text-gray-800">${item.name}</td>
+                    <td class="px-4 py-3">
+                        <span class="px-3 py-1 rounded-full text-sm font-semibold ${item.quantity < 10 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
+                            ${item.quantity} ชิ้น
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-600">${item.department}</td>
+                    <td class="px-4 py-3 text-gray-600">${new Date(item.lastUpdated).toLocaleString('th-TH')}</td>
+                </tr>
+            `).join('');
+        }
+
+        function updateHistoryTable() {
+            const tbody = document.getElementById('historyTableBody');
+            
+            if (currentRequisitions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">ยังไม่มีประวัติการเบิก</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = currentRequisitions.map(req => {
+                const date = new Date(req.timestamp);
+                return `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-4 py-3 text-gray-600">${date.toLocaleDateString('th-TH')}</td>
+                        <td class="px-4 py-3 text-gray-600">${date.toLocaleTimeString('th-TH')}</td>
+                        <td class="px-4 py-3 font-semibold text-gray-800">${req.requesterName}</td>
+                        <td class="px-4 py-3 text-gray-800">${req.materialName}</td>
+                        <td class="px-4 py-3 text-gray-600">${req.department}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                                ${req.quantity} ชิ้น
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function handleAddStock(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('materialName').value.trim();
+            const quantity = parseInt(document.getElementById('materialQuantity').value);
+            const department = document.getElementById('materialDepartment').value;
+
+            if (!name || quantity < 1 || !department) {
+                showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
+                return;
+            }
+
+            const btnText = document.getElementById('addStockBtnText');
+            const spinner = document.getElementById('addStockSpinner');
+            btnText.classList.add('hidden');
+            spinner.classList.remove('hidden');
+
+            try {
+                const { collection, getDocs, addDoc, updateDoc, doc, increment } = window.firestoreModules;
+                
+                const materialsRef = collection(window.db, 'materials');
+                const snapshot = await getDocs(materialsRef);
+                const existingMaterial = snapshot.docs.find(doc => 
+                    doc.data().name === name && doc.data().department === department
+                );
+
+                if (existingMaterial) {
+                    await updateDoc(doc(window.db, 'materials', existingMaterial.id), {
+                        quantity: increment(quantity),
+                        lastUpdated: new Date().toISOString()
+                    });
+                    showToast(`อัพเดทจำนวน ${name} เรียบร้อยแล้ว! ✅`, 'success');
+                } else {
+                    await addDoc(materialsRef, {
+                        name: name,
+                        quantity: quantity,
+                        department: department,
+                        lastUpdated: new Date().toISOString(),
+                        createdAt: new Date().toISOString()
+                    });
+                    showToast(`เพิ่มวัสดุ ${name} เรียบร้อยแล้ว! ✅`, 'success');
+                }
+
+                document.getElementById('addStockForm').reset();
+                await loadAllData();
+                
+            } catch (error) {
+                console.error('Error adding stock:', error);
+                showToast('เกิดข้อผิดพลาดในการเพิ่มวัสดุ', 'error');
+            } finally {
+                btnText.classList.remove('hidden');
+                spinner.classList.add('hidden');
+            }
+        }
+
+        async function loadMaterialsByDepartment() {
+            const department = document.getElementById('reqDepartment').value;
+            const materialSelect = document.getElementById('reqMaterial');
+            const availableQty = document.getElementById('availableQuantity');
+            
+            materialSelect.innerHTML = '<option value="">-- เลือกวัสดุ --</option>';
+            availableQty.textContent = '';
+
+            if (!department) return;
+
+            const materials = currentMaterials.filter(m => m.department === department && m.quantity > 0);
+            
+            if (materials.length === 0) {
+                materialSelect.innerHTML = '<option value="">ไม่มีวัสดุในแผนกนี้</option>';
+                return;
+            }
+
+            materials.forEach(material => {
+                const option = document.createElement('option');
+                option.value = material.id;
+                option.textContent = `${material.name} (คงเหลือ ${material.quantity} ชิ้น)`;
+                option.dataset.quantity = material.quantity;
+                option.dataset.name = material.name;
+                materialSelect.appendChild(option);
+            });
+        }
+
+        function showAvailableQuantity() {
+            const select = document.getElementById('reqMaterial');
+            const availableQty = document.getElementById('availableQuantity');
+            
+            if (select.value) {
+                const quantity = select.options[select.selectedIndex].dataset.quantity;
+                availableQty.textContent = `📦 จำนวนคงเหลือ: ${quantity} ชิ้น`;
+                availableQty.className = 'mt-2 text-sm font-semibold text-green-600';
+            } else {
+                availableQty.textContent = '';
+            }
+        }
+
+        async function handleRequisition(event) {
+            event.preventDefault();
+            
+            const requesterName = document.getElementById('requesterName').value.trim();
+            const materialId = document.getElementById('reqMaterial').value;
+            const quantity = parseInt(document.getElementById('reqQuantity').value);
+            const department = document.getElementById('reqDepartment').value;
+
+            if (!requesterName || !materialId || quantity < 1) {
+                showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
+                return;
+            }
+
+            const material = currentMaterials.find(m => m.id === materialId);
+            
+            if (!material) {
+                showToast('ไม่พบวัสดุที่เลือก', 'error');
+                return;
+            }
+
+            if (quantity > material.quantity) {
+                showToast(`จำนวนไม่เพียงพอ! คงเหลือเพียง ${material.quantity} ชิ้น`, 'warning');
+                return;
+            }
+
+            const btnText = document.getElementById('reqBtnText');
+            const spinner = document.getElementById('reqSpinner');
+            btnText.classList.add('hidden');
+            spinner.classList.remove('hidden');
+
+            try {
+                const { collection, addDoc, updateDoc, doc, increment } = window.firestoreModules;
+                
+                await addDoc(collection(window.db, 'requisitions'), {
+                    requesterName: requesterName,
+                    materialName: material.name,
+                    materialId: materialId,
+                    department: department,
+                    quantity: quantity,
+                    timestamp: new Date().toISOString()
+                });
+
+                await updateDoc(doc(window.db, 'materials', materialId), {
+                    quantity: increment(-quantity),
+                    lastUpdated: new Date().toISOString()
+                });
+
+                showToast(`เบิกวัสดุ ${material.name} จำนวน ${quantity} ชิ้น สำเร็จ! ✅`, 'success');
+                document.getElementById('requisitionForm').reset();
+                await loadAllData();
+                
+            } catch (error) {
+                console.error('Error processing requisition:', error);
+                showToast('เกิดข้อผิดพลาดในการเบิกวัสดุ', 'error');
+            } finally {
+                btnText.classList.remove('hidden');
+                spinner.classList.add('hidden');
+            }
+        }
+
+        function exportToExcel() {
+            if (currentRequisitions.length === 0) {
+                showToast('ไม่มีข้อมูลให้ส่งออก', 'warning');
+                return;
+            }
+
+            const data = currentRequisitions.map(req => {
+                const date = new Date(req.timestamp);
+                return {
+                    'วันที่': date.toLocaleDateString('th-TH'),
+                    'เวลา': date.toLocaleTimeString('th-TH'),
+                    'ผู้เบิก': req.requesterName,
+                    'วัสดุ': req.materialName,
+                    'แผนก': req.department,
+                    'จำนวน': req.quantity
+                };
+            });
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "ประวัติการเบิก");
+            
+            const fileName = `ประวัติการเบิกวัสดุ_${new Date().toLocaleDateString('th-TH')}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            
+            showToast('ส่งออกไฟล์ Excel สำเร็จ! 📥', 'success');
+        }
+
+        let lowStockChart = null;
+        let popularChart = null;
+
+        function updateStatisticsCharts() {
+            const lowStock = currentMaterials
+                .sort((a, b) => a.quantity - b.quantity)
+                .slice(0, 5);
+
+            const materialReqCount = {};
+            currentRequisitions.forEach(req => {
+                materialReqCount[req.materialName] = (materialReqCount[req.materialName] || 0) + req.quantity;
+            });
+
+            const popularItems = Object.entries(materialReqCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+
+            const lowStockCtx = document.getElementById('lowStockChart');
+            if (lowStockChart) {
+                lowStockChart.destroy();
+            }
+            lowStockChart = new Chart(lowStockCtx, {
+                type: 'bar',
+                data: {
+                    labels: lowStock.map(item => item.name),
+                    datasets: [{
+                        label: 'จำนวนคงเหลือ',
+                        data: lowStock.map(item => item.quantity),
+                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+
+            const popularCtx = document.getElementById('popularChart');
+            if (popularChart) {
+                popularChart.destroy();
+            }
+            popularChart = new Chart(popularCtx, {
+                type: 'bar',
+                data: {
+                    labels: popularItems.map(([name]) => name),
+                    datasets: [{
+                        label: 'จำนวนครั้งที่เบิก',
+                        data: popularItems.map(([, count]) => count),
+                        backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function onConfigChange(config) {
+            const systemName = config.system_name || defaultConfig.system_name;
+            const institutionName = config.institution_name || defaultConfig.institution_name;
+
+            const systemNameElement = document.getElementById('systemName');
+            const institutionNameElement = document.getElementById('institutionName');
+
+            if (systemNameElement) {
+                systemNameElement.textContent = systemName;
+            }
+            if (institutionNameElement) {
+                institutionNameElement.textContent = institutionName;
+            }
+        }
+
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig: defaultConfig,
+                onConfigChange: onConfigChange,
+                mapToCapabilities: (config) => ({
+                    recolorables: [],
+                    borderables: [],
+                    fontEditable: undefined,
+                    fontSizeable: undefined
+                }),
+                mapToEditPanelValues: (config) => new Map([
+                    ["system_name", config.system_name || defaultConfig.system_name],
+                    ["institution_name", config.institution_name || defaultConfig.institution_name]
+                ])
+            });
+        }
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ba9e2d15479894b',t:'MTc2Nzg1NjM0MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
