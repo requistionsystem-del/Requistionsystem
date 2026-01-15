@@ -1,514 +1,614 @@
 <!doctype html>
 <html lang="th" class="h-full">
- <head>
+
+<head>
   <meta charset="UTF-8">
   <title>ระบบเบิกจ่ายวัสดุและคลังพัสดุ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&amp;display=swap"
+    rel="stylesheet">
   <style>
-body {
-  box-sizing: border-box;
-  font-family: 'Sarabun', sans-serif;
-}
+    body {
+      box-sizing: border-box;
+      font-family: 'Sarabun', sans-serif;
+    }
 
-*, *::before, *::after {
-  font-family: 'Sarabun', sans-serif;
-}
+    *,
+    *::before,
+    *::after {
+      font-family: 'Sarabun', sans-serif;
+    }
 
-.toast {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 16px 24px;
-  border-radius: 8px;
-  color: white;
-  font-weight: 500;
-  z-index: 1000;
-  animation: slideIn 0.3s ease-out;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 24px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
 
-@keyframes slideIn {
-  from {
-    transform: translateX(400px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
 
-.toast-success { background-color: #10b981; }
-.toast-error { background-color: #ef4444; }
-.toast-warning { background-color: #f59e0b; }
-.toast-info { background-color: #3b82f6; }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
 
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 999;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-  animation: fadeIn 0.2s ease-out;
-}
+    .toast-success {
+      background-color: #10b981;
+    }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+    .toast-error {
+      background-color: #ef4444;
+    }
 
-.modal-content {
-  background-color: white;
-  margin: 10% auto;
-  padding: 0;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
-  animation: slideUp 0.3s ease-out;
-}
+    .toast-warning {
+      background-color: #f59e0b;
+    }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(50px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
+    .toast-info {
+      background-color: #3b82f6;
+    }
 
-@media (max-width: 768px) {
-  .sidebar-mobile {
-    position: fixed;
-    left: -100%;
-    transition: left 0.3s ease;
-    z-index: 100;
-  }
-  
-  .sidebar-mobile.active {
-    left: 0;
-  }
-}
-</style>
-  <style>@view-transition { navigation: auto; }</style>
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 0;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar-mobile {
+        position: fixed;
+        left: -100%;
+        transition: left 0.3s ease;
+        z-index: 100;
+      }
+
+      .sidebar-mobile.active {
+        left: 0;
+      }
+    }
+  </style>
+  <style>
+    @view-transition {
+      navigation: auto;
+    }
+  </style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
   <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
- </head>
- <body class="h-full bg-gray-50"><!-- ================= LOGIN PAGE ================= -->
-  <div id="loginPage" class="h-full flex items-center justify-center bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-700 p-4">
-   <div class="bg-white p-6 md:p-10 rounded-2xl shadow-2xl w-full max-w-md">
-    <div class="text-center mb-8">
-     <div class="text-4xl md:text-5xl mb-4">
-      📦
-     </div>
-     <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">ระบบเบิกจ่ายวัสดุและคลังพัสดุ</h2>
-     <p class="text-gray-500 text-xs md:text-sm">Material Requisition &amp; Stock Management</p>
+</head>
+
+<body class="h-full bg-gray-50"><!-- ================= LOGIN PAGE ================= -->
+  <div id="loginPage"
+    class="h-full flex items-center justify-center bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-700 p-4">
+    <div class="bg-white p-6 md:p-10 rounded-2xl shadow-2xl w-full max-w-md">
+      <div class="text-center mb-8">
+        <div class="text-4xl md:text-5xl mb-4">
+          📦
+        </div>
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">ระบบเบิกจ่ายวัสดุและคลังพัสดุ</h2>
+        <p class="text-gray-500 text-xs md:text-sm">Material Requisition &amp; Stock Management</p>
+      </div>
+      <form onsubmit="login(event)" class="space-y-4">
+        <div><label class="block text-sm font-semibold text-gray-700 mb-2">ชื่อผู้ใช้</label> <input id="username"
+            type="text"
+            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+        </div>
+        <div><label class="block text-sm font-semibold text-gray-700 mb-2">รหัสผ่าน</label> <input id="password"
+            type="password"
+            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+        </div><button type="submit"
+          class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition shadow-lg">
+          🔐 เข้าสู่ระบบ </button>
+      </form>
     </div>
-    <form onsubmit="login(event)" class="space-y-4">
-     <div><label class="block text-sm font-semibold text-gray-700 mb-2">ชื่อผู้ใช้</label> <input id="username" type="text"  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-     </div>
-     <div><label class="block text-sm font-semibold text-gray-700 mb-2">รหัสผ่าน</label> <input id="password" type="password" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-     </div><button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition shadow-lg"> 🔐 เข้าสู่ระบบ </button>
-    </form>
-   </div>
   </div><!-- ================= MAIN DASHBOARD ================= -->
-  <div id="mainDashboard" class="hidden h-full flex flex-col md:flex-row overflow-hidden"><!-- Mobile Menu Button --> <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="md:hidden fixed top-4 left-4 z-50 bg-indigo-600 text-white p-3 rounded-lg shadow-lg"> ☰ </button> <!-- Sidebar -->
-   <aside id="sidebar" class="sidebar-mobile w-full md:w-72 bg-gradient-to-b from-indigo-900 to-indigo-800 text-white flex flex-col shadow-xl">
-    <div class="p-6 border-b border-indigo-700">
-     <div class="text-3xl md:text-4xl mb-3">
-      📦
-     </div>
-     <h1 class="text-lg md:text-xl font-bold">ระบบคลังพัสดุ</h1>
-     <p class="text-indigo-300 text-xs md:text-sm mt-1">Stock Management System</p>
-    </div>
-    <nav class="flex-1 p-4 space-y-2 overflow-y-auto"><button onclick="showSection('addStock')" id="menuAddStock" class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-3 menu-item"> <span class="text-xl">➕</span> <span class="font-medium text-sm md:text-base">เพิ่มสต็อกวัสดุ</span> </button> <button onclick="showSection('requisition')" id="menuRequisition" class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-3 menu-item"> <span class="text-xl">📋</span> <span class="font-medium text-sm md:text-base">เบิกวัสดุ</span> </button> <button onclick="showSection('history')" id="menuHistory" class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-3 menu-item"> <span class="text-xl">📜</span> <span class="font-medium text-sm md:text-base">ประวัติการเบิกวัสดุ</span> </button> <button onclick="showSection('statistics')" id="menuStatistics" class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-3 menu-item"> <span class="text-xl">📊</span> <span class="font-medium text-sm md:text-base">สถิติและรายงาน</span> </button>
-    </nav>
-    <div class="p-4 border-t border-indigo-700">
-     <div class="bg-indigo-800 rounded-lg p-3 mb-3">
-      <div class="text-indigo-300 text-xs mb-1">
-       ผู้ใช้งานระบบ
-      </div>
-      <div class="font-semibold text-sm md:text-base">
-       👤 Admin
-      </div>
-     </div><button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 py-3 rounded-lg font-semibold transition shadow-lg text-sm md:text-base"> 🚪 ออกจากระบบ </button>
-    </div>
-   </aside><!-- Main Content -->
-   <main class="flex-1 overflow-y-auto bg-gray-50"><!-- ================= ADD STOCK SECTION ================= -->
-    <section id="addStock" class="p-4 md:p-8 section-content">
-     <div class="mb-6">
-      <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">➕ เพิ่มสต็อกวัสดุ</h2>
-      <p class="text-gray-600 text-sm md:text-base">เพิ่มวัสดุเข้าคลังพัสดุ</p>
-     </div>
-     <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 max-w-4xl">
-      <form onsubmit="addStock(event)" class="space-y-5">
-       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div><label class="block text-sm font-semibold text-gray-700 mb-2">ชื่อวัสดุ</label> <input id="stockMaterialName" type="text" placeholder="เช่น เมาส์คอมพิวเตอร์" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+  <div id="mainDashboard" class="hidden h-full flex flex-col md:flex-row overflow-hidden"><!-- Mobile Menu Button -->
+    <button id="mobileMenuBtn" onclick="toggleMobileMenu()"
+      class="md:hidden fixed top-4 left-4 z-50 bg-indigo-600 text-white p-3 rounded-lg shadow-lg"> ☰ </button>
+    <!-- Sidebar -->
+    <aside id="sidebar"
+      class="sidebar-mobile w-full md:w-72 bg-gradient-to-b from-indigo-900 to-indigo-800 text-white flex flex-col shadow-xl">
+      <div class="p-6 border-b border-indigo-700">
+        <div class="text-3xl md:text-4xl mb-3">
+          📦
         </div>
-        <div><label class="block text-sm font-semibold text-gray-700 mb-2">จำนวน</label> <input id="stockQuantity" type="number" min="1" placeholder="จำนวนที่เพิ่ม" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+        <h1 class="text-lg md:text-xl font-bold">ระบบคลังพัสดุ</h1>
+        <p class="text-indigo-300 text-xs md:text-sm mt-1">Stock Management System</p>
+      </div>
+      <nav class="flex-1 p-4 space-y-2 overflow-y-auto"><button onclick="showSection('addStock')" id="menuAddStock"
+          class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-3 menu-item">
+          <span class="text-xl">➕</span> <span class="font-medium text-sm md:text-base">เพิ่มสต็อกวัสดุ</span> </button>
+        <button onclick="showSection('requisition')" id="menuRequisition"
+          class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-3 menu-item">
+          <span class="text-xl">📋</span> <span class="font-medium text-sm md:text-base">เบิกวัสดุ</span> </button>
+        <button onclick="showSection('history')" id="menuHistory"
+          class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-3 menu-item">
+          <span class="text-xl">📜</span> <span class="font-medium text-sm md:text-base">ประวัติการเบิกวัสดุ</span>
+        </button> <button onclick="showSection('statistics')" id="menuStatistics"
+          class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-3 menu-item">
+          <span class="text-xl">📊</span> <span class="font-medium text-sm md:text-base">สถิติและรายงาน</span> </button>
+      </nav>
+      <div class="p-4 border-t border-indigo-700">
+        <div class="bg-indigo-800 rounded-lg p-3 mb-3">
+          <div class="text-indigo-300 text-xs mb-1">
+            ผู้ใช้งานระบบ
+          </div>
+          <div class="font-semibold text-sm md:text-base">
+            👤 Admin
+          </div>
+        </div><button onclick="logout()"
+          class="w-full bg-red-600 hover:bg-red-700 py-3 rounded-lg font-semibold transition shadow-lg text-sm md:text-base">
+          🚪 ออกจากระบบ </button>
+      </div>
+    </aside><!-- Main Content -->
+    <main class="flex-1 overflow-y-auto bg-gray-50"><!-- ================= ADD STOCK SECTION ================= -->
+      <section id="addStock" class="p-4 md:p-8 section-content">
+        <div class="mb-6">
+          <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">➕ เพิ่มสต็อกวัสดุ</h2>
+          <p class="text-gray-600 text-sm md:text-base">เพิ่มวัสดุเข้าคลังพัสดุ</p>
         </div>
-       </div>
-       <div><label class="block text-sm font-semibold text-gray-700 mb-2">แผนก</label> <select id="stockDepartment" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition bg-white"> <option value="">-- เลือกแผนก --</option> <option value="แผนกเทคโนโลยีคอมพิวเตอร์">แผนกเทคโนโลยีคอมพิวเตอร์</option> <option value="แผนกอิเล็กทรอนิกส์">แผนกอิเล็กทรอนิกส์</option> </select>
-       </div>
-       <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3 pt-4"><button type="submit" class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 transition shadow-lg"> 💾 บันทึกข้อมูล </button> <button type="reset" class="px-6 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition"> 🔄 ล้างข้อมูล </button>
-       </div>
-      </form>
-     </div><!-- Current Stock Table -->
-     <div class="mt-8 bg-white rounded-xl shadow-lg p-4 md:p-6">
-      <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-4">📦 สต็อกปัจจุบัน</h3>
-      <div class="overflow-x-auto">
-       <table class="w-full min-w-max">
-        <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-         <tr>
-          <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base">ชื่อวัสดุ</th>
-          <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base">แผนก</th>
-          <th class="px-3 md:px-4 py-3 text-center font-semibold text-sm md:text-base">คงเหลือ</th>
-          <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base hidden md:table-cell">วันที่อัพเดท</th>
-          <th class="px-3 md:px-4 py-3 text-center font-semibold text-sm md:text-base">จัดการ</th>
-         </tr>
-        </thead>
-        <tbody id="stockTableBody" class="divide-y divide-gray-200">
-         <tr>
-          <td colspan="5" class="px-4 py-8 text-center text-gray-500">⏳ กำลังโหลดข้อมูล...</td>
-         </tr>
-        </tbody>
-       </table>
-      </div>
-     </div>
-    </section><!-- ================= REQUISITION SECTION ================= -->
-    <section id="requisition" class="hidden p-4 md:p-8 section-content">
-     <div class="mb-6">
-      <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">📋 เบิกวัสดุ</h2>
-      <p class="text-gray-600 text-sm md:text-base">ทำรายการเบิกวัสดุออกจากคลัง</p>
-     </div>
-     <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 max-w-4xl">
-      <form onsubmit="submitRequisition(event)" class="space-y-5">
-       <div><label class="block text-sm font-semibold text-gray-700 mb-2">ชื่อผู้เบิก</label> <input id="requesterName" type="text" placeholder="กรอกชื่อผู้เบิก" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-       </div>
-       <div><label class="block text-sm font-semibold text-gray-700 mb-2">แผนก</label> <select id="reqDepartment" onchange="filterMaterialsByDept()" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition bg-white"> <option value="">-- เลือกแผนก --</option> <option value="แผนกเทคโนโลยีคอมพิวเตอร์">แผนกเทคโนโลยีคอมพิวเตอร์</option> <option value="แผนกอิเล็กทรอนิกส์">แผนกอิเล็กทรอนิกส์</option> </select>
-       </div>
-       <div><label class="block text-sm font-semibold text-gray-700 mb-2">เลือกวัสดุ</label> <select id="reqMaterial" onchange="updateAvailableQty()" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition bg-white"> <option value="">-- เลือกแผนกก่อน --</option> </select>
-       </div>
-       <div><label class="block text-sm font-semibold text-gray-700 mb-2">จำนวนที่ต้องการเบิก</label> <input id="reqQuantity" type="number" min="1" placeholder="กรอกจำนวน" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-        <div id="availableQtyDisplay" class="mt-2 text-sm font-medium text-gray-600"></div>
-       </div>
-       <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3 pt-4"><button type="submit" class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition shadow-lg"> ✅ ยืนยันการเบิก </button> <button type="reset" onclick="clearRequisitionForm()" class="px-6 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition"> 🔄 ล้างข้อมูล </button>
-       </div>
-      </form>
-     </div>
-    </section><!-- ================= HISTORY SECTION ================= -->
-    <section id="history" class="hidden p-4 md:p-8 section-content">
-     <div class="mb-6">
-      <div class="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
-       <div>
-        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">📜 ประวัติการเบิกวัสดุ</h2>
-        <p class="text-gray-600 text-sm md:text-base">รายการเบิกวัสดุทั้งหมด</p>
-       </div><button onclick="exportToExcel()" class="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-4 md:px-6 py-3 rounded-lg font-semibold hover:from-emerald-600 hover:to-green-700 transition shadow-lg flex items-center justify-center space-x-2 text-sm md:text-base"> <span>📥</span> <span>Export Excel</span> </button>
-      </div>
-     </div><!-- Date Filter -->
-     <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6">
-      <h3 class="text-lg font-bold text-gray-800 mb-4">🔍 กรองตามวันที่</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-       <div><label class="block text-sm font-semibold text-gray-700 mb-2">วันที่เริ่มต้น</label> <input id="filterStartDate" type="date" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-       </div>
-       <div><label class="block text-sm font-semibold text-gray-700 mb-2">วันที่สิ้นสุด</label> <input id="filterEndDate" type="date" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
-       </div>
-       <div class="flex items-end space-x-2"><button onclick="filterHistory()" class="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-indigo-700 transition text-sm md:text-base"> กรองข้อมูล </button> <button onclick="clearFilter()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm md:text-base"> ล้าง </button>
-       </div>
-      </div>
-     </div>
-     <div class="bg-white rounded-xl shadow-lg p-4 md:p-6">
-      <div class="overflow-x-auto">
-       <table class="w-full min-w-max">
-        <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-         <tr>
-          <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base">ผู้เบิก</th>
-          <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base">วัสดุ</th>
-          <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base hidden lg:table-cell">แผนก</th>
-          <th class="px-3 md:px-4 py-3 text-center font-semibold text-sm md:text-base">จำนวน</th>
-          <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base">วันที่</th>
-          <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base hidden md:table-cell">เวลา</th>
-          <th class="px-3 md:px-4 py-3 text-center font-semibold text-sm md:text-base">ลบ</th>
-         </tr>
-        </thead>
-        <tbody id="historyTableBody" class="divide-y divide-gray-200">
-         <tr>
-          <td colspan="7" class="px-4 py-8 text-center text-gray-500">⏳ กำลังโหลดข้อมูล...</td>
-         </tr>
-        </tbody>
-       </table>
-      </div>
-     </div>
-    </section><!-- ================= STATISTICS SECTION ================= -->
-    <section id="statistics" class="hidden p-4 md:p-8 section-content">
-     <div class="mb-6">
-      <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">📊 สถิติและรายงาน</h2>
-      <p class="text-gray-600 text-sm md:text-base">วิเคราะห์ข้อมูลการใช้งานวัสดุ</p>
-     </div>
-     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-      <div class="bg-white rounded-xl shadow-lg p-4 md:p-6">
-       <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-4">📉 วัสดุคงเหลือน้อยที่สุด 5 อันดับ</h3>
-       <canvas id="lowStockChart"></canvas>
-      </div>
-      <div class="bg-white rounded-xl shadow-lg p-4 md:p-6">
-       <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-4">🔥 วัสดุที่ถูกเบิกมากที่สุด</h3>
-       <canvas id="mostRequisitionedChart"></canvas>
-      </div>
-     </div>
-     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-      <div class="bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-xl shadow-lg p-4 md:p-6">
-       <div class="text-2xl md:text-3xl mb-2">
-        📦
-       </div>
-       <div class="text-2xl md:text-3xl font-bold mb-1" id="totalMaterials">
-        0
-       </div>
-       <div class="text-blue-100 text-sm md:text-base">
-        รายการวัสดุทั้งหมด
-       </div>
-      </div>
-      <div class="bg-gradient-to-br from-purple-500 to-pink-600 text-white rounded-xl shadow-lg p-4 md:p-6">
-       <div class="text-2xl md:text-3xl mb-2">
-        📋
-       </div>
-       <div class="text-2xl md:text-3xl font-bold mb-1" id="totalRequisitions">
-        0
-       </div>
-       <div class="text-purple-100 text-sm md:text-base">
-        จำนวนครั้งที่เบิกทั้งหมด
-       </div>
-      </div>
-      <div class="bg-gradient-to-br from-emerald-500 to-green-600 text-white rounded-xl shadow-lg p-4 md:p-6">
-       <div class="text-2xl md:text-3xl mb-2">
-        ⚠️
-       </div>
-       <div class="text-2xl md:text-3xl font-bold mb-1" id="lowStockCount">
-        0
-       </div>
-       <div class="text-emerald-100 text-sm md:text-base">
-        รายการที่สต็อกต่ำ (≤5)
-       </div>
-      </div>
-      <div class="bg-gradient-to-br from-red-500 to-rose-600 text-white rounded-xl shadow-lg p-4 md:p-6">
-       <div class="text-2xl md:text-3xl mb-2">
-        ❌
-       </div>
-       <div class="text-2xl md:text-3xl font-bold mb-1" id="outOfStockCount">
-        0
-       </div>
-       <div class="text-red-100 text-sm md:text-base">
-        รายการที่หมดสต็อก (=0)
-       </div>
-      </div>
-     </div>
-    </section>
-   </main>
+        <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 max-w-4xl">
+          <form onsubmit="addStock(event)" class="space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div><label class="block text-sm font-semibold text-gray-700 mb-2">ชื่อวัสดุ</label> <input
+                  id="stockMaterialName" type="text" placeholder="เช่น เมาส์คอมพิวเตอร์" required
+                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+              </div>
+              <div><label class="block text-sm font-semibold text-gray-700 mb-2">จำนวน</label> <input id="stockQuantity"
+                  type="number" min="1" placeholder="จำนวนที่เพิ่ม" required
+                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+              </div>
+            </div>
+            <div><label class="block text-sm font-semibold text-gray-700 mb-2">แผนก</label> <select id="stockDepartment"
+                required
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition bg-white">
+                <option value="">-- เลือกแผนก --</option>
+                <option value="แผนกเทคโนโลยีคอมพิวเตอร์">แผนกเทคโนโลยีคอมพิวเตอร์</option>
+                <option value="แผนกอิเล็กทรอนิกส์">แผนกอิเล็กทรอนิกส์</option>
+              </select>
+            </div>
+            <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3 pt-4"><button type="submit"
+                class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 transition shadow-lg">
+                💾 บันทึกข้อมูล </button> <button type="reset"
+                class="px-6 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition"> 🔄
+                ล้างข้อมูล </button>
+            </div>
+          </form>
+        </div><!-- Current Stock Table -->
+        <div class="mt-8 bg-white rounded-xl shadow-lg p-4 md:p-6">
+          <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-4">📦 สต็อกปัจจุบัน</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-max">
+              <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                <tr>
+                  <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base">ชื่อวัสดุ</th>
+                  <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base">แผนก</th>
+                  <th class="px-3 md:px-4 py-3 text-center font-semibold text-sm md:text-base">คงเหลือ</th>
+                  <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base hidden md:table-cell">
+                    วันที่อัพเดท</th>
+                  <th class="px-3 md:px-4 py-3 text-center font-semibold text-sm md:text-base">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="stockTableBody" class="divide-y divide-gray-200">
+                <tr>
+                  <td colspan="5" class="px-4 py-8 text-center text-gray-500">⏳ กำลังโหลดข้อมูล...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section><!-- ================= REQUISITION SECTION ================= -->
+      <section id="requisition" class="hidden p-4 md:p-8 section-content">
+        <div class="mb-6">
+          <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">📋 เบิกวัสดุ</h2>
+          <p class="text-gray-600 text-sm md:text-base">ทำรายการเบิกวัสดุออกจากคลัง</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 max-w-4xl">
+          <form onsubmit="submitRequisition(event)" class="space-y-5">
+            <div><label class="block text-sm font-semibold text-gray-700 mb-2">ชื่อผู้เบิก</label> <input
+                id="requesterName" type="text" placeholder="กรอกชื่อผู้เบิก" required
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+            </div>
+            <div><label class="block text-sm font-semibold text-gray-700 mb-2">แผนก</label> <select id="reqDepartment"
+                onchange="filterMaterialsByDept()" required
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition bg-white">
+                <option value="">-- เลือกแผนก --</option>
+                <option value="แผนกเทคโนโลยีคอมพิวเตอร์">แผนกเทคโนโลยีคอมพิวเตอร์</option>
+                <option value="แผนกอิเล็กทรอนิกส์">แผนกอิเล็กทรอนิกส์</option>
+              </select>
+            </div>
+            <div><label class="block text-sm font-semibold text-gray-700 mb-2">เลือกวัสดุ</label> <select
+                id="reqMaterial" onchange="updateAvailableQty()" required
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition bg-white">
+                <option value="">-- เลือกแผนกก่อน --</option>
+              </select>
+            </div>
+            <div><label class="block text-sm font-semibold text-gray-700 mb-2">จำนวนที่ต้องการเบิก</label> <input
+                id="reqQuantity" type="number" min="1" placeholder="กรอกจำนวน" required
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+              <div id="availableQtyDisplay" class="mt-2 text-sm font-medium text-gray-600"></div>
+            </div>
+            <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3 pt-4"><button type="submit"
+                class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition shadow-lg">
+                ✅ ยืนยันการเบิก </button> <button type="reset" onclick="clearRequisitionForm()"
+                class="px-6 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition"> 🔄
+                ล้างข้อมูล </button>
+            </div>
+          </form>
+        </div>
+      </section><!-- ================= HISTORY SECTION ================= -->
+      <section id="history" class="hidden p-4 md:p-8 section-content">
+        <div class="mb-6">
+          <div class="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
+            <div>
+              <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">📜 ประวัติการเบิกวัสดุ</h2>
+              <p class="text-gray-600 text-sm md:text-base">รายการเบิกวัสดุทั้งหมด</p>
+            </div><button onclick="exportToExcel()"
+              class="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-4 md:px-6 py-3 rounded-lg font-semibold hover:from-emerald-600 hover:to-green-700 transition shadow-lg flex items-center justify-center space-x-2 text-sm md:text-base">
+              <span>📥</span> <span>Export Excel</span> </button>
+          </div>
+        </div><!-- Date Filter -->
+        <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6">
+          <h3 class="text-lg font-bold text-gray-800 mb-4">🔍 กรองตามวันที่</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div><label class="block text-sm font-semibold text-gray-700 mb-2">วันที่เริ่มต้น</label> <input
+                id="filterStartDate" type="date"
+                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+            </div>
+            <div><label class="block text-sm font-semibold text-gray-700 mb-2">วันที่สิ้นสุด</label> <input
+                id="filterEndDate" type="date"
+                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+            </div>
+            <div class="flex items-end space-x-2"><button onclick="filterHistory()"
+                class="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-indigo-700 transition text-sm md:text-base">
+                กรองข้อมูล </button> <button onclick="clearFilter()"
+                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm md:text-base">
+                ล้าง </button>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-4 md:p-6">
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-max">
+              <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                <tr>
+                  <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base">ผู้เบิก</th>
+                  <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base">วัสดุ</th>
+                  <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base hidden lg:table-cell">แผนก
+                  </th>
+                  <th class="px-3 md:px-4 py-3 text-center font-semibold text-sm md:text-base">จำนวน</th>
+                  <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base">วันที่</th>
+                  <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base hidden md:table-cell">เวลา
+                  </th>
+                  <th class="px-3 md:px-4 py-3 text-center font-semibold text-sm md:text-base">ลบ</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody" class="divide-y divide-gray-200">
+                <tr>
+                  <td colspan="7" class="px-4 py-8 text-center text-gray-500">⏳ กำลังโหลดข้อมูล...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section><!-- ================= STATISTICS SECTION ================= -->
+      <section id="statistics" class="hidden p-4 md:p-8 section-content">
+        <div class="mb-6">
+          <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">📊 สถิติและรายงาน</h2>
+          <p class="text-gray-600 text-sm md:text-base">วิเคราะห์ข้อมูลการใช้งานวัสดุ</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div class="bg-white rounded-xl shadow-lg p-4 md:p-6">
+            <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-4">📉 วัสดุคงเหลือน้อยที่สุด 5 อันดับ</h3>
+            <canvas id="lowStockChart"></canvas>
+          </div>
+          <div class="bg-white rounded-xl shadow-lg p-4 md:p-6">
+            <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-4">🔥 วัสดุที่ถูกเบิกมากที่สุด</h3>
+            <canvas id="mostRequisitionedChart"></canvas>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div class="bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-xl shadow-lg p-4 md:p-6">
+            <div class="text-2xl md:text-3xl mb-2">
+              📦
+            </div>
+            <div class="text-2xl md:text-3xl font-bold mb-1" id="totalMaterials">
+              0
+            </div>
+            <div class="text-blue-100 text-sm md:text-base">
+              รายการวัสดุทั้งหมด
+            </div>
+          </div>
+          <div class="bg-gradient-to-br from-purple-500 to-pink-600 text-white rounded-xl shadow-lg p-4 md:p-6">
+            <div class="text-2xl md:text-3xl mb-2">
+              📋
+            </div>
+            <div class="text-2xl md:text-3xl font-bold mb-1" id="totalRequisitions">
+              0
+            </div>
+            <div class="text-purple-100 text-sm md:text-base">
+              จำนวนครั้งที่เบิกทั้งหมด
+            </div>
+          </div>
+          <div class="bg-gradient-to-br from-emerald-500 to-green-600 text-white rounded-xl shadow-lg p-4 md:p-6">
+            <div class="text-2xl md:text-3xl mb-2">
+              ⚠️
+            </div>
+            <div class="text-2xl md:text-3xl font-bold mb-1" id="lowStockCount">
+              0
+            </div>
+            <div class="text-emerald-100 text-sm md:text-base">
+              รายการที่สต็อกต่ำ (≤5)
+            </div>
+          </div>
+          <div class="bg-gradient-to-br from-red-500 to-rose-600 text-white rounded-xl shadow-lg p-4 md:p-6">
+            <div class="text-2xl md:text-3xl mb-2">
+              ❌
+            </div>
+            <div class="text-2xl md:text-3xl font-bold mb-1" id="outOfStockCount">
+              0
+            </div>
+            <div class="text-red-100 text-sm md:text-base">
+              รายการที่หมดสต็อก (=0)
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div><!-- ================= DELETE CONFIRMATION MODAL ================= -->
   <div id="deleteModal" class="modal">
-   <div class="modal-content">
-    <div class="bg-red-600 text-white p-4 md:p-6 rounded-t-xl">
-     <h3 class="text-xl md:text-2xl font-bold">⚠️ ยืนยันการลบ</h3>
+    <div class="modal-content">
+      <div class="bg-red-600 text-white p-4 md:p-6 rounded-t-xl">
+        <h3 class="text-xl md:text-2xl font-bold">⚠️ ยืนยันการลบ</h3>
+      </div>
+      <div class="p-4 md:p-6">
+        <p class="text-gray-700 mb-6 text-sm md:text-base" id="deleteMessage">คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?</p>
+        <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3"><button onclick="confirmDelete()"
+            class="flex-1 bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition"> ✓
+            ยืนยันการลบ </button> <button onclick="closeDeleteModal()"
+            class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition"> ✕
+            ยกเลิก </button>
+        </div>
+      </div>
     </div>
-    <div class="p-4 md:p-6">
-     <p class="text-gray-700 mb-6 text-sm md:text-base" id="deleteMessage">คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?</p>
-     <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3"><button onclick="confirmDelete()" class="flex-1 bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition"> ✓ ยืนยันการลบ </button> <button onclick="closeDeleteModal()" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition"> ✕ ยกเลิก </button>
-     </div>
-    </div>
-   </div>
   </div><!-- ================= FIREBASE & JAVASCRIPT ================= -->
   <script type="module">
-  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-  import { getDatabase, ref, set, push, onValue, update, get, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getDatabase, ref, set, push, onValue, update, get, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyA3hnlQ_hXg6gDn3EYlFmcIBLoPAiwwt0w",
-    authDomain: "requistionsystem-33881.firebaseapp.com",
-    databaseURL: "https://requistionsystem-33881-default-rtdb.firebaseio.com",
-    projectId: "requistionsystem-33881",
-    storageBucket: "requistionsystem-33881.firebasestorage.app",
-    messagingSenderId: "1030474523782",
-    appId: "1:1030474523782:web:fc4bf066a367d9f637dc7b",
-    measurementId: "G-M3N19WESNP"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3hnlQ_hXg6gDn3EYlFmcIBLoPAiwwt0w",
+      authDomain: "requistionsystem-33881.firebaseapp.com",
+      databaseURL: "https://requistionsystem-33881-default-rtdb.firebaseio.com",
+      projectId: "requistionsystem-33881",
+      storageBucket: "requistionsystem-33881.firebasestorage.app",
+      messagingSenderId: "1044287198754",
+      appId: "1:1044287198754:web:fc4bf066a367d9f637dc7b",
+      measurementId: "G-M3N19WESNP"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-  window.db = db;
-  window.dbRef = { ref, set, push, onValue, update, get, remove };
+    window.db = db;
+    window.dbRef = { ref, set, push, onValue, update, get, remove };
 
-  // Global variables for delete modal
-  let deleteTarget = null;
-  let deleteType = null;
-  let allRequisitions = [];
+    // Global variables for delete modal
+    let deleteTarget = null;
+    let deleteType = null;
+    let allRequisitions = [];
 
-  // Toast notification system
-  window.showToast = function(message, type = 'info') {
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-      toast.style.animation = 'slideIn 0.3s ease-out reverse';
-      setTimeout(() => toast.remove(), 300);
-    }, 3000);
-  };
+    // Toast notification system
+    window.showToast = function (message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
 
-  // Mobile menu toggle
-  window.toggleMobileMenu = function() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('active');
-  };
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease-out reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    };
 
-  // Login function
-  window.login = function(event) {
-    event.preventDefault();
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+    // Mobile menu toggle
+    window.toggleMobileMenu = function () {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('active');
+    };
 
-    if (username === 'Admin' && password === 'Admin1234') {
-      document.getElementById('loginPage').classList.add('hidden');
-      document.getElementById('mainDashboard').classList.remove('hidden');
-      showSection('addStock');
-      showToast('เข้าสู่ระบบสำเร็จ! ยินดีต้อนรับ Admin', 'success');
-      loadAllData();
-    } else {
-      showToast('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'error');
-    }
-  };
+    // Login function
+    window.login = function (event) {
+      event.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
 
-  // Logout function
-  window.logout = function() {
-    document.getElementById('mainDashboard').classList.add('hidden');
-    document.getElementById('loginPage').classList.remove('hidden');
-    document.getElementById('username').value = '';
-    document.getElementById('password').value = '';
-    showToast('ออกจากระบบสำเร็จ', 'info');
-  };
+      if (username === 'Admin' && password === 'Admin1234') {
+        document.getElementById('loginPage').classList.add('hidden');
+        document.getElementById('mainDashboard').classList.remove('hidden');
+        showSection('addStock');
+        showToast('เข้าสู่ระบบสำเร็จ! ยินดีต้อนรับ Admin', 'success');
+        loadAllData();
+      } else {
+        showToast('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'error');
+      }
+    };
 
-  // Show section function
-  window.showSection = function(sectionName) {
-    const sections = document.querySelectorAll('.section-content');
-    sections.forEach(section => section.classList.add('hidden'));
-    
-    const menuItems = document.querySelectorAll('.menu-item');
-    menuItems.forEach(item => item.classList.remove('bg-indigo-700'));
-    
-    document.getElementById(sectionName).classList.remove('hidden');
-    document.getElementById('menu' + sectionName.charAt(0).toUpperCase() + sectionName.slice(1)).classList.add('bg-indigo-700');
+    // Logout function
+    window.logout = function () {
+      document.getElementById('mainDashboard').classList.add('hidden');
+      document.getElementById('loginPage').classList.remove('hidden');
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+      showToast('ออกจากระบบสำเร็จ', 'info');
+    };
 
-    // Close mobile menu
-    if (window.innerWidth < 768) {
-      document.getElementById('sidebar').classList.remove('active');
-    }
+    // Show section function
+    window.showSection = function (sectionName) {
+      const sections = document.querySelectorAll('.section-content');
+      sections.forEach(section => section.classList.add('hidden'));
 
-    if (sectionName === 'statistics') {
-      setTimeout(updateStatistics, 100);
-    }
-  };
+      const menuItems = document.querySelectorAll('.menu-item');
+      menuItems.forEach(item => item.classList.remove('bg-indigo-700'));
 
-  // Add stock function
-  window.addStock = function(event) {
-    event.preventDefault();
-    
-    const materialName = document.getElementById('stockMaterialName').value.trim();
-    const quantity = parseInt(document.getElementById('stockQuantity').value);
-    const department = document.getElementById('stockDepartment').value;
+      document.getElementById(sectionName).classList.remove('hidden');
+      document.getElementById('menu' + sectionName.charAt(0).toUpperCase() + sectionName.slice(1)).classList.add('bg-indigo-700');
 
-    if (!materialName || !quantity || !department) {
-      showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
-      return;
-    }
-
-    if (quantity <= 0) {
-      showToast('จำนวนต้องมากกว่า 0', 'warning');
-      return;
-    }
-
-    const stockRef = window.dbRef.ref(window.db, 'stocks');
-    
-    window.dbRef.get(stockRef).then((snapshot) => {
-      let existingKey = null;
-      
-      if (snapshot.exists()) {
-        snapshot.forEach((child) => {
-          const item = child.val();
-          if (item.name === materialName && item.department === department) {
-            existingKey = child.key;
-          }
-        });
+      // Close mobile menu
+      if (window.innerWidth < 768) {
+        document.getElementById('sidebar').classList.remove('active');
       }
 
-      const timestamp = new Date().toLocaleString('th-TH', { 
-        timeZone: 'Asia/Bangkok',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
+      if (sectionName === 'statistics') {
+        setTimeout(updateStatistics, 100);
+      }
+    };
 
-      if (existingKey) {
-        const existingRef = window.dbRef.ref(window.db, `stocks/${existingKey}`);
-        window.dbRef.get(existingRef).then((snap) => {
-          const currentQty = snap.val().quantity || 0;
-          window.dbRef.update(existingRef, {
-            quantity: currentQty + quantity,
+    // Add stock function
+    window.addStock = function (event) {
+      event.preventDefault();
+
+      const materialName = document.getElementById('stockMaterialName').value.trim();
+      const quantity = parseInt(document.getElementById('stockQuantity').value);
+      const department = document.getElementById('stockDepartment').value;
+
+      if (!materialName || !quantity || !department) {
+        showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
+        return;
+      }
+
+      if (quantity <= 0) {
+        showToast('จำนวนต้องมากกว่า 0', 'warning');
+        return;
+      }
+
+      const stockRef = window.dbRef.ref(window.db, 'stocks');
+
+      window.dbRef.get(stockRef).then((snapshot) => {
+        let existingKey = null;
+
+        if (snapshot.exists()) {
+          snapshot.forEach((child) => {
+            const item = child.val();
+            if (item.name === materialName && item.department === department) {
+              existingKey = child.key;
+            }
+          });
+        }
+
+        const timestamp = new Date().toLocaleString('th-TH', {
+          timeZone: 'Asia/Bangkok',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+
+        if (existingKey) {
+          const existingRef = window.dbRef.ref(window.db, `stocks/${existingKey}`);
+          window.dbRef.get(existingRef).then((snap) => {
+            const currentQty = snap.val().quantity || 0;
+            window.dbRef.update(existingRef, {
+              quantity: currentQty + quantity,
+              lastUpdated: timestamp
+            }).then(() => {
+              showToast(`เพิ่มสต็อก "${materialName}" จำนวน ${quantity} รายการสำเร็จ`, 'success');
+              event.target.reset();
+            });
+          });
+        } else {
+          const newStockRef = window.dbRef.push(stockRef);
+          window.dbRef.set(newStockRef, {
+            name: materialName,
+            quantity: quantity,
+            department: department,
             lastUpdated: timestamp
           }).then(() => {
-            showToast(`เพิ่มสต็อก "${materialName}" จำนวน ${quantity} รายการสำเร็จ`, 'success');
+            showToast(`เพิ่มวัสดุใหม่ "${materialName}" จำนวน ${quantity} รายการสำเร็จ`, 'success');
             event.target.reset();
           });
-        });
-      } else {
-        const newStockRef = window.dbRef.push(stockRef);
-        window.dbRef.set(newStockRef, {
-          name: materialName,
-          quantity: quantity,
-          department: department,
-          lastUpdated: timestamp
-        }).then(() => {
-          showToast(`เพิ่มวัสดุใหม่ "${materialName}" จำนวน ${quantity} รายการสำเร็จ`, 'success');
-          event.target.reset();
-        });
-      }
-    }).catch((error) => {
-      showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
-    });
-  };
+        }
+      }).catch((error) => {
+        showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
+      });
+    };
 
-  // Load stock data
-  function loadStockData() {
-    const stockRef = window.dbRef.ref(window.db, 'stocks');
-    window.dbRef.onValue(stockRef, (snapshot) => {
-      const tbody = document.getElementById('stockTableBody');
-      tbody.innerHTML = '';
+    // Load stock data
+    function loadStockData() {
+      const stockRef = window.dbRef.ref(window.db, 'stocks');
+      window.dbRef.onValue(stockRef, (snapshot) => {
+        const tbody = document.getElementById('stockTableBody');
+        tbody.innerHTML = '';
 
-      if (snapshot.exists()) {
-        const stocks = [];
-        snapshot.forEach((child) => {
-          stocks.push({ key: child.key, ...child.val() });
-        });
+        if (snapshot.exists()) {
+          const stocks = [];
+          snapshot.forEach((child) => {
+            stocks.push({ key: child.key, ...child.val() });
+          });
 
-        stocks.sort((a, b) => a.name.localeCompare(b.name, 'th'));
+          stocks.sort((a, b) => a.name.localeCompare(b.name, 'th'));
 
-        stocks.forEach((stock) => {
-          const row = document.createElement('tr');
-          row.className = 'hover:bg-gray-50';
-          
-          const qtyClass = stock.quantity <= 5 ? 'text-red-600 font-bold' : 'text-gray-800';
-          
-          row.innerHTML = `
+          stocks.forEach((stock) => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-50';
+
+            const qtyClass = stock.quantity <= 5 ? 'text-red-600 font-bold' : 'text-gray-800';
+
+            row.innerHTML = `
             <td class="px-3 md:px-4 py-3 text-sm md:text-base">${stock.name}</td>
             <td class="px-3 md:px-4 py-3 text-sm md:text-base">${stock.department}</td>
             <td class="px-3 md:px-4 py-3 text-center ${qtyClass} text-sm md:text-base">${stock.quantity}</td>
@@ -520,189 +620,189 @@ body {
               </button>
             </td>
           `;
-          tbody.appendChild(row);
-        });
-      } else {
-        tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500 text-sm md:text-base">ยังไม่มีข้อมูลสต็อก</td></tr>';
-      }
-    });
-  }
-
-  // Show delete stock modal
-  window.showDeleteStockModal = function(key, name, department) {
-    deleteTarget = key;
-    deleteType = 'stock';
-    document.getElementById('deleteMessage').textContent = `คุณต้องการลบวัสดุ "${name}" (${department}) ใช่หรือไม่?`;
-    document.getElementById('deleteModal').style.display = 'block';
-  };
-
-  // Filter materials by department
-  window.filterMaterialsByDept = function() {
-    const dept = document.getElementById('reqDepartment').value;
-    const materialSelect = document.getElementById('reqMaterial');
-    materialSelect.innerHTML = '<option value="">-- โปรดรอสักครู่ --</option>';
-    
-    document.getElementById('availableQtyDisplay').textContent = '';
-    document.getElementById('reqQuantity').value = '';
-
-    if (!dept) {
-      materialSelect.innerHTML = '<option value="">-- เลือกแผนกก่อน --</option>';
-      return;
+            tbody.appendChild(row);
+          });
+        } else {
+          tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500 text-sm md:text-base">ยังไม่มีข้อมูลสต็อก</td></tr>';
+        }
+      });
     }
 
-    const stockRef = window.dbRef.ref(window.db, 'stocks');
-    window.dbRef.get(stockRef).then((snapshot) => {
-      materialSelect.innerHTML = '<option value="">-- เลือกวัสดุ --</option>';
-      
-      if (snapshot.exists()) {
-        const materials = [];
-        snapshot.forEach((child) => {
-          const item = child.val();
-          if (item.department === dept && item.quantity > 0) {
-            materials.push({ key: child.key, name: item.name, qty: item.quantity });
+    // Show delete stock modal
+    window.showDeleteStockModal = function (key, name, department) {
+      deleteTarget = key;
+      deleteType = 'stock';
+      document.getElementById('deleteMessage').textContent = `คุณต้องการลบวัสดุ "${name}" (${department}) ใช่หรือไม่?`;
+      document.getElementById('deleteModal').style.display = 'block';
+    };
+
+    // Filter materials by department
+    window.filterMaterialsByDept = function () {
+      const dept = document.getElementById('reqDepartment').value;
+      const materialSelect = document.getElementById('reqMaterial');
+      materialSelect.innerHTML = '<option value="">-- โปรดรอสักครู่ --</option>';
+
+      document.getElementById('availableQtyDisplay').textContent = '';
+      document.getElementById('reqQuantity').value = '';
+
+      if (!dept) {
+        materialSelect.innerHTML = '<option value="">-- เลือกแผนกก่อน --</option>';
+        return;
+      }
+
+      const stockRef = window.dbRef.ref(window.db, 'stocks');
+      window.dbRef.get(stockRef).then((snapshot) => {
+        materialSelect.innerHTML = '<option value="">-- เลือกวัสดุ --</option>';
+
+        if (snapshot.exists()) {
+          const materials = [];
+          snapshot.forEach((child) => {
+            const item = child.val();
+            if (item.department === dept && item.quantity > 0) {
+              materials.push({ key: child.key, name: item.name, qty: item.quantity });
+            }
+          });
+
+          materials.sort((a, b) => a.name.localeCompare(b.name, 'th'));
+
+          materials.forEach((mat) => {
+            const option = document.createElement('option');
+            option.value = mat.key;
+            option.textContent = `${mat.name} (คงเหลือ: ${mat.qty})`;
+            materialSelect.appendChild(option);
+          });
+
+          if (materials.length === 0) {
+            materialSelect.innerHTML = '<option value="">-- ไม่มีวัสดุในแผนกนี้ --</option>';
           }
-        });
-
-        materials.sort((a, b) => a.name.localeCompare(b.name, 'th'));
-
-        materials.forEach((mat) => {
-          const option = document.createElement('option');
-          option.value = mat.key;
-          option.textContent = `${mat.name} (คงเหลือ: ${mat.qty})`;
-          materialSelect.appendChild(option);
-        });
-
-        if (materials.length === 0) {
+        } else {
           materialSelect.innerHTML = '<option value="">-- ไม่มีวัสดุในแผนกนี้ --</option>';
         }
-      } else {
-        materialSelect.innerHTML = '<option value="">-- ไม่มีวัสดุในแผนกนี้ --</option>';
-      }
-    });
-  };
-
-  // Update available quantity display
-  window.updateAvailableQty = function() {
-    const materialKey = document.getElementById('reqMaterial').value;
-    const display = document.getElementById('availableQtyDisplay');
-    
-    if (!materialKey) {
-      display.textContent = '';
-      return;
-    }
-
-    const stockRef = window.dbRef.ref(window.db, `stocks/${materialKey}`);
-    window.dbRef.get(stockRef).then((snapshot) => {
-      if (snapshot.exists()) {
-        const qty = snapshot.val().quantity;
-        const color = qty <= 5 ? 'text-red-600' : 'text-green-600';
-        display.innerHTML = `<span class="${color}">📦 จำนวนคงเหลือ: ${qty} รายการ</span>`;
-      }
-    });
-  };
-
-  // Submit requisition
-  window.submitRequisition = function(event) {
-    event.preventDefault();
-
-    const requesterName = document.getElementById('requesterName').value.trim();
-    const materialKey = document.getElementById('reqMaterial').value;
-    const reqQty = parseInt(document.getElementById('reqQuantity').value);
-
-    if (!requesterName || !materialKey || !reqQty) {
-      showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
-      return;
-    }
-
-    if (reqQty <= 0) {
-      showToast('จำนวนต้องมากกว่า 0', 'warning');
-      return;
-    }
-
-    const stockRef = window.dbRef.ref(window.db, `stocks/${materialKey}`);
-    
-    window.dbRef.get(stockRef).then((snapshot) => {
-      if (!snapshot.exists()) {
-        showToast('ไม่พบวัสดุนี้ในระบบ', 'error');
-        return;
-      }
-
-      const stock = snapshot.val();
-      
-      if (stock.quantity < reqQty) {
-        showToast(`วัสดุไม่เพียงพอ! มีเพียง ${stock.quantity} รายการ`, 'error');
-        return;
-      }
-
-      const now = new Date();
-      const timestamp = now.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
-      const date = now.toLocaleDateString('th-TH');
-      const time = now.toLocaleTimeString('th-TH');
-      const isoDate = now.toISOString().split('T')[0]; // For filtering
-
-      const historyRef = window.dbRef.ref(window.db, 'requisitions');
-      const newReqRef = window.dbRef.push(historyRef);
-      
-      window.dbRef.set(newReqRef, {
-        requesterName: requesterName,
-        materialName: stock.name,
-        department: stock.department,
-        quantity: reqQty,
-        date: date,
-        time: time,
-        timestamp: timestamp,
-        isoDate: isoDate
-      }).then(() => {
-        return window.dbRef.update(stockRef, {
-          quantity: stock.quantity - reqQty,
-          lastUpdated: timestamp
-        });
-      }).then(() => {
-        showToast(`เบิกวัสดุ "${stock.name}" จำนวน ${reqQty} รายการสำเร็จ`, 'success');
-        clearRequisitionForm();
-      }).catch((error) => {
-        showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
       });
-    });
-  };
+    };
 
-  // Clear requisition form
-  window.clearRequisitionForm = function() {
-    document.getElementById('requesterName').value = '';
-    document.getElementById('reqDepartment').value = '';
-    document.getElementById('reqMaterial').innerHTML = '<option value="">-- เลือกแผนกก่อน --</option>';
-    document.getElementById('reqQuantity').value = '';
-    document.getElementById('availableQtyDisplay').textContent = '';
-  };
+    // Update available quantity display
+    window.updateAvailableQty = function () {
+      const materialKey = document.getElementById('reqMaterial').value;
+      const display = document.getElementById('availableQtyDisplay');
 
-  // Load requisition history
-  function loadRequisitionHistory() {
-    const historyRef = window.dbRef.ref(window.db, 'requisitions');
-    window.dbRef.onValue(historyRef, (snapshot) => {
-      allRequisitions = [];
-      
-      if (snapshot.exists()) {
-        snapshot.forEach((child) => {
-          allRequisitions.push({ key: child.key, ...child.val() });
-        });
+      if (!materialKey) {
+        display.textContent = '';
+        return;
       }
-      
-      displayRequisitions(allRequisitions);
-    });
-  }
 
-  // Display requisitions
-  function displayRequisitions(requisitions) {
-    const tbody = document.getElementById('historyTableBody');
-    tbody.innerHTML = '';
+      const stockRef = window.dbRef.ref(window.db, `stocks/${materialKey}`);
+      window.dbRef.get(stockRef).then((snapshot) => {
+        if (snapshot.exists()) {
+          const qty = snapshot.val().quantity;
+          const color = qty <= 5 ? 'text-red-600' : 'text-green-600';
+          display.innerHTML = `<span class="${color}">📦 จำนวนคงเหลือ: ${qty} รายการ</span>`;
+        }
+      });
+    };
 
-    if (requisitions.length > 0) {
-      const sorted = [...requisitions].reverse();
+    // Submit requisition
+    window.submitRequisition = function (event) {
+      event.preventDefault();
 
-      sorted.forEach((req) => {
-        const row = document.createElement('tr');
-        row.className = 'hover:bg-gray-50';
-        row.innerHTML = `
+      const requesterName = document.getElementById('requesterName').value.trim();
+      const materialKey = document.getElementById('reqMaterial').value;
+      const reqQty = parseInt(document.getElementById('reqQuantity').value);
+
+      if (!requesterName || !materialKey || !reqQty) {
+        showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
+        return;
+      }
+
+      if (reqQty <= 0) {
+        showToast('จำนวนต้องมากกว่า 0', 'warning');
+        return;
+      }
+
+      const stockRef = window.dbRef.ref(window.db, `stocks/${materialKey}`);
+
+      window.dbRef.get(stockRef).then((snapshot) => {
+        if (!snapshot.exists()) {
+          showToast('ไม่พบวัสดุนี้ในระบบ', 'error');
+          return;
+        }
+
+        const stock = snapshot.val();
+
+        if (stock.quantity < reqQty) {
+          showToast(`วัสดุไม่เพียงพอ! มีเพียง ${stock.quantity} รายการ`, 'error');
+          return;
+        }
+
+        const now = new Date();
+        const timestamp = now.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+        const date = now.toLocaleDateString('th-TH');
+        const time = now.toLocaleTimeString('th-TH');
+        const isoDate = now.toISOString().split('T')[0]; // For filtering
+
+        const historyRef = window.dbRef.ref(window.db, 'requisitions');
+        const newReqRef = window.dbRef.push(historyRef);
+
+        window.dbRef.set(newReqRef, {
+          requesterName: requesterName,
+          materialName: stock.name,
+          department: stock.department,
+          quantity: reqQty,
+          date: date,
+          time: time,
+          timestamp: timestamp,
+          isoDate: isoDate
+        }).then(() => {
+          return window.dbRef.update(stockRef, {
+            quantity: stock.quantity - reqQty,
+            lastUpdated: timestamp
+          });
+        }).then(() => {
+          showToast(`เบิกวัสดุ "${stock.name}" จำนวน ${reqQty} รายการสำเร็จ`, 'success');
+          clearRequisitionForm();
+        }).catch((error) => {
+          showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
+        });
+      });
+    };
+
+    // Clear requisition form
+    window.clearRequisitionForm = function () {
+      document.getElementById('requesterName').value = '';
+      document.getElementById('reqDepartment').value = '';
+      document.getElementById('reqMaterial').innerHTML = '<option value="">-- เลือกแผนกก่อน --</option>';
+      document.getElementById('reqQuantity').value = '';
+      document.getElementById('availableQtyDisplay').textContent = '';
+    };
+
+    // Load requisition history
+    function loadRequisitionHistory() {
+      const historyRef = window.dbRef.ref(window.db, 'requisitions');
+      window.dbRef.onValue(historyRef, (snapshot) => {
+        allRequisitions = [];
+
+        if (snapshot.exists()) {
+          snapshot.forEach((child) => {
+            allRequisitions.push({ key: child.key, ...child.val() });
+          });
+        }
+
+        displayRequisitions(allRequisitions);
+      });
+    }
+
+    // Display requisitions
+    function displayRequisitions(requisitions) {
+      const tbody = document.getElementById('historyTableBody');
+      tbody.innerHTML = '';
+
+      if (requisitions.length > 0) {
+        const sorted = [...requisitions].reverse();
+
+        sorted.forEach((req) => {
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-gray-50';
+          row.innerHTML = `
           <td class="px-3 md:px-4 py-3 font-medium text-sm md:text-base">${req.requesterName}</td>
           <td class="px-3 md:px-4 py-3 text-sm md:text-base">${req.materialName}</td>
           <td class="px-3 md:px-4 py-3 text-sm md:text-base hidden lg:table-cell">${req.department}</td>
@@ -716,265 +816,267 @@ body {
             </button>
           </td>
         `;
-        tbody.appendChild(row);
-      });
-    } else {
-      tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-500 text-sm md:text-base">ยังไม่มีประวัติการเบิก</td></tr>';
-    }
-  }
-
-  // Filter history
-  window.filterHistory = function() {
-    const startDate = document.getElementById('filterStartDate').value;
-    const endDate = document.getElementById('filterEndDate').value;
-
-    if (!startDate || !endDate) {
-      showToast('กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด', 'warning');
-      return;
+          tbody.appendChild(row);
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-500 text-sm md:text-base">ยังไม่มีประวัติการเบิก</td></tr>';
+      }
     }
 
-    if (startDate > endDate) {
-      showToast('วันที่เริ่มต้นต้องไม่เกินวันที่สิ้นสุด', 'warning');
-      return;
-    }
+    // Filter history
+    window.filterHistory = function () {
+      const startDate = document.getElementById('filterStartDate').value;
+      const endDate = document.getElementById('filterEndDate').value;
 
-    const filtered = allRequisitions.filter(req => {
-      const reqDate = req.isoDate || req.date;
-      return reqDate >= startDate && reqDate <= endDate;
-    });
+      if (!startDate || !endDate) {
+        showToast('กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด', 'warning');
+        return;
+      }
 
-    displayRequisitions(filtered);
-    showToast(`พบ ${filtered.length} รายการในช่วงวันที่ที่เลือก`, 'info');
-  };
+      if (startDate > endDate) {
+        showToast('วันที่เริ่มต้นต้องไม่เกินวันที่สิ้นสุด', 'warning');
+        return;
+      }
 
-  // Clear filter
-  window.clearFilter = function() {
-    document.getElementById('filterStartDate').value = '';
-    document.getElementById('filterEndDate').value = '';
-    displayRequisitions(allRequisitions);
-    showToast('ล้างตัวกรองสำเร็จ', 'info');
-  };
-
-  // Show delete history modal
-  window.showDeleteHistoryModal = function(key, materialName, requesterName, date) {
-    deleteTarget = key;
-    deleteType = 'history';
-    document.getElementById('deleteMessage').textContent = `คุณต้องการลบประวัติการเบิก "${materialName}" โดย ${requesterName} วันที่ ${date} ใช่หรือไม่?`;
-    document.getElementById('deleteModal').style.display = 'block';
-  };
-
-  // Confirm delete
-  window.confirmDelete = function() {
-    if (!deleteTarget || !deleteType) return;
-
-    if (deleteType === 'stock') {
-      const stockRef = window.dbRef.ref(window.db, `stocks/${deleteTarget}`);
-      window.dbRef.remove(stockRef).then(() => {
-        showToast('ลบวัสดุสำเร็จ', 'success');
-        closeDeleteModal();
-      }).catch((error) => {
-        showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
-      });
-    } else if (deleteType === 'history') {
-      const historyRef = window.dbRef.ref(window.db, `requisitions/${deleteTarget}`);
-      window.dbRef.remove(historyRef).then(() => {
-        showToast('ลบประวัติการเบิกสำเร็จ', 'success');
-        closeDeleteModal();
-      }).catch((error) => {
-        showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
-      });
-    }
-  };
-
-  // Close delete modal
-  window.closeDeleteModal = function() {
-    document.getElementById('deleteModal').style.display = 'none';
-    deleteTarget = null;
-    deleteType = null;
-  };
-
-  // Export to Excel
-  window.exportToExcel = function() {
-    const startDate = document.getElementById('filterStartDate').value;
-    const endDate = document.getElementById('filterEndDate').value;
-
-    let dataToExport = allRequisitions;
-
-    if (startDate && endDate) {
-      dataToExport = allRequisitions.filter(req => {
+      const filtered = allRequisitions.filter(req => {
         const reqDate = req.isoDate || req.date;
         return reqDate >= startDate && reqDate <= endDate;
       });
-    }
 
-    if (dataToExport.length === 0) {
-      showToast('ไม่มีข้อมูลสำหรับส่งออก', 'warning');
-      return;
-    }
+      displayRequisitions(filtered);
+      showToast(`พบ ${filtered.length} รายการในช่วงวันที่ที่เลือก`, 'info');
+    };
 
-    const data = [];
-    data.push(['ผู้เบิก', 'วัสดุ', 'แผนก', 'จำนวน', 'วันที่', 'เวลา']);
+    // Clear filter
+    window.clearFilter = function () {
+      document.getElementById('filterStartDate').value = '';
+      document.getElementById('filterEndDate').value = '';
+      displayRequisitions(allRequisitions);
+      showToast('ล้างตัวกรองสำเร็จ', 'info');
+    };
 
-    dataToExport.forEach((req) => {
-      data.push([
-        req.requesterName,
-        req.materialName,
-        req.department,
-        req.quantity,
-        req.date,
-        req.time
-      ]);
-    });
+    // Show delete history modal
+    window.showDeleteHistoryModal = function (key, materialName, requesterName, date) {
+      deleteTarget = key;
+      deleteType = 'history';
+      document.getElementById('deleteMessage').textContent = `คุณต้องการลบประวัติการเบิก "${materialName}" โดย ${requesterName} วันที่ ${date} ใช่หรือไม่?`;
+      document.getElementById('deleteModal').style.display = 'block';
+    };
 
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    
-    ws['!cols'] = [
-      { wch: 20 },
-      { wch: 30 },
-      { wch: 25 },
-      { wch: 10 },
-      { wch: 15 },
-      { wch: 12 }
-    ];
+    // Confirm delete
+    window.confirmDelete = function () {
+      if (!deleteTarget || !deleteType) return;
 
-    XLSX.utils.book_append_sheet(wb, ws, 'ประวัติการเบิก');
-    
-    let filename = `ประวัติการเบิกวัสดุ_${new Date().toLocaleDateString('th-TH').replace(/\//g, '-')}`;
-    if (startDate && endDate) {
-      filename += `_${startDate}_ถึง_${endDate}`;
-    }
-    filename += '.xlsx';
-    
-    XLSX.writeFile(wb, filename);
-    
-    showToast('ส่งออกไฟล์ Excel สำเร็จ', 'success');
-  };
+      if (deleteType === 'stock') {
+        const stockRef = window.dbRef.ref(window.db, `stocks/${deleteTarget}`);
+        window.dbRef.remove(stockRef).then(() => {
+          showToast('ลบวัสดุสำเร็จ', 'success');
+          closeDeleteModal();
+        }).catch((error) => {
+          showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
+        });
+      } else if (deleteType === 'history') {
+        const historyRef = window.dbRef.ref(window.db, `requisitions/${deleteTarget}`);
+        window.dbRef.remove(historyRef).then(() => {
+          showToast('ลบประวัติการเบิกสำเร็จ', 'success');
+          closeDeleteModal();
+        }).catch((error) => {
+          showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
+        });
+      }
+    };
 
-  // Update statistics
-  let lowStockChart = null;
-  let mostReqChart = null;
+    // Close delete modal
+    window.closeDeleteModal = function () {
+      document.getElementById('deleteModal').style.display = 'none';
+      deleteTarget = null;
+      deleteType = null;
+    };
 
-  window.updateStatistics = function() {
-    const stockRef = window.dbRef.ref(window.db, 'stocks');
-    const reqRef = window.dbRef.ref(window.db, 'requisitions');
+    // Export to Excel
+    window.exportToExcel = function () {
+      const startDate = document.getElementById('filterStartDate').value;
+      const endDate = document.getElementById('filterEndDate').value;
 
-    Promise.all([
-      window.dbRef.get(stockRef),
-      window.dbRef.get(reqRef)
-    ]).then(([stockSnapshot, reqSnapshot]) => {
-      // Total materials
-      let totalMaterials = 0;
-      let lowStockCount = 0;
-      let outOfStockCount = 0;
-      const stocks = [];
+      let dataToExport = allRequisitions;
 
-      if (stockSnapshot.exists()) {
-        stockSnapshot.forEach((child) => {
-          const stock = child.val();
-          totalMaterials++;
-          if (stock.quantity === 0) outOfStockCount++;
-          else if (stock.quantity <= 5) lowStockCount++;
-          stocks.push(stock);
+      if (startDate && endDate) {
+        dataToExport = allRequisitions.filter(req => {
+          const reqDate = req.isoDate || req.date;
+          return reqDate >= startDate && reqDate <= endDate;
         });
       }
 
-      document.getElementById('totalMaterials').textContent = totalMaterials;
-      document.getElementById('lowStockCount').textContent = lowStockCount;
-      document.getElementById('outOfStockCount').textContent = outOfStockCount;
-
-      // Low stock chart
-      stocks.sort((a, b) => a.quantity - b.quantity);
-      const top5Low = stocks.slice(0, 5);
-
-      const ctx1 = document.getElementById('lowStockChart');
-      if (lowStockChart) lowStockChart.destroy();
-      
-      lowStockChart = new Chart(ctx1, {
-        type: 'bar',
-        data: {
-          labels: top5Low.map(s => s.name.length > 15 ? s.name.substring(0, 15) + '...' : s.name),
-          datasets: [{
-            label: 'จำนวนคงเหลือ',
-            data: top5Low.map(s => s.quantity),
-            backgroundColor: 'rgba(239, 68, 68, 0.8)',
-            borderColor: 'rgba(239, 68, 68, 1)',
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { stepSize: 1 }
-            }
-          }
-        }
-      });
-
-      // Most requisitioned
-      let totalRequisitions = 0;
-      const reqCount = {};
-
-      if (reqSnapshot.exists()) {
-        reqSnapshot.forEach((child) => {
-          const req = child.val();
-          totalRequisitions++;
-          reqCount[req.materialName] = (reqCount[req.materialName] || 0) + req.quantity;
-        });
+      if (dataToExport.length === 0) {
+        showToast('ไม่มีข้อมูลสำหรับส่งออก', 'warning');
+        return;
       }
 
-      document.getElementById('totalRequisitions').textContent = totalRequisitions;
+      const data = [];
+      data.push(['ผู้เบิก', 'วัสดุ', 'แผนก', 'จำนวน', 'วันที่', 'เวลา']);
 
-      const sortedReq = Object.entries(reqCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      dataToExport.forEach((req) => {
+        data.push([
+          req.requesterName,
+          req.materialName,
+          req.department,
+          req.quantity,
+          req.date,
+          req.time
+        ]);
+      });
 
-      const ctx2 = document.getElementById('mostRequisitionedChart');
-      if (mostReqChart) mostReqChart.destroy();
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(data);
 
-      mostReqChart = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-          labels: sortedReq.map(r => r[0].length > 15 ? r[0].substring(0, 15) + '...' : r[0]),
-          datasets: [{
-            label: 'จำนวนที่เบิกทั้งหมด',
-            data: sortedReq.map(r => r[1]),
-            backgroundColor: 'rgba(99, 102, 241, 0.8)',
-            borderColor: 'rgba(99, 102, 241, 1)',
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: { display: false }
+      ws['!cols'] = [
+        { wch: 20 },
+        { wch: 30 },
+        { wch: 25 },
+        { wch: 10 },
+        { wch: 15 },
+        { wch: 12 }
+      ];
+
+      XLSX.utils.book_append_sheet(wb, ws, 'ประวัติการเบิก');
+
+      let filename = `ประวัติการเบิกวัสดุ_${new Date().toLocaleDateString('th-TH').replace(/\//g, '-')}`;
+      if (startDate && endDate) {
+        filename += `_${startDate}_ถึง_${endDate}`;
+      }
+      filename += '.xlsx';
+
+      XLSX.writeFile(wb, filename);
+
+      showToast('ส่งออกไฟล์ Excel สำเร็จ', 'success');
+    };
+
+    // Update statistics
+    let lowStockChart = null;
+    let mostReqChart = null;
+
+    window.updateStatistics = function () {
+      const stockRef = window.dbRef.ref(window.db, 'stocks');
+      const reqRef = window.dbRef.ref(window.db, 'requisitions');
+
+      Promise.all([
+        window.dbRef.get(stockRef),
+        window.dbRef.get(reqRef)
+      ]).then(([stockSnapshot, reqSnapshot]) => {
+        // Total materials
+        let totalMaterials = 0;
+        let lowStockCount = 0;
+        let outOfStockCount = 0;
+        const stocks = [];
+
+        if (stockSnapshot.exists()) {
+          stockSnapshot.forEach((child) => {
+            const stock = child.val();
+            totalMaterials++;
+            if (stock.quantity === 0) outOfStockCount++;
+            else if (stock.quantity <= 5) lowStockCount++;
+            stocks.push(stock);
+          });
+        }
+
+        document.getElementById('totalMaterials').textContent = totalMaterials;
+        document.getElementById('lowStockCount').textContent = lowStockCount;
+        document.getElementById('outOfStockCount').textContent = outOfStockCount;
+
+        // Low stock chart
+        stocks.sort((a, b) => a.quantity - b.quantity);
+        const top5Low = stocks.slice(0, 5);
+
+        const ctx1 = document.getElementById('lowStockChart');
+        if (lowStockChart) lowStockChart.destroy();
+
+        lowStockChart = new Chart(ctx1, {
+          type: 'bar',
+          data: {
+            labels: top5Low.map(s => s.name.length > 15 ? s.name.substring(0, 15) + '...' : s.name),
+            datasets: [{
+              label: 'จำนวนคงเหลือ',
+              data: top5Low.map(s => s.quantity),
+              backgroundColor: 'rgba(239, 68, 68, 0.8)',
+              borderColor: 'rgba(239, 68, 68, 1)',
+              borderWidth: 2
+            }]
           },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { stepSize: 1 }
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1 }
+              }
             }
           }
+        });
+
+        // Most requisitioned
+        let totalRequisitions = 0;
+        const reqCount = {};
+
+        if (reqSnapshot.exists()) {
+          reqSnapshot.forEach((child) => {
+            const req = child.val();
+            totalRequisitions++;
+            reqCount[req.materialName] = (reqCount[req.materialName] || 0) + req.quantity;
+          });
         }
+
+        document.getElementById('totalRequisitions').textContent = totalRequisitions;
+
+        const sortedReq = Object.entries(reqCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+        const ctx2 = document.getElementById('mostRequisitionedChart');
+        if (mostReqChart) mostReqChart.destroy();
+
+        mostReqChart = new Chart(ctx2, {
+          type: 'bar',
+          data: {
+            labels: sortedReq.map(r => r[0].length > 15 ? r[0].substring(0, 15) + '...' : r[0]),
+            datasets: [{
+              label: 'จำนวนที่เบิกทั้งหมด',
+              data: sortedReq.map(r => r[1]),
+              backgroundColor: 'rgba(99, 102, 241, 0.8)',
+              borderColor: 'rgba(99, 102, 241, 1)',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1 }
+              }
+            }
+          }
+        });
       });
+    };
+
+    // Load all data on init
+    function loadAllData() {
+      loadStockData();
+      loadRequisitionHistory();
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Firebase initialized successfully');
     });
-  };
+  </script>
+  <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9baa9a5951e9894d',t:'MTc2Nzg2Mzg1OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+</body>
 
-  // Load all data on init
-  function loadAllData() {
-    loadStockData();
-    loadRequisitionHistory();
-  }
-
-  // Initialize on page load
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('Firebase initialized successfully');
-  });
-</script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9baa9a5951e9894d',t:'MTc2Nzg2Mzg1OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
