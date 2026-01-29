@@ -7,15 +7,15 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
 body {
   box-sizing: border-box;
-  font-family: 'Sarabun', sans-serif;
+  font-family: 'Kanit', sans-serif;
 }
 
 *, *::before, *::after {
-  font-family: 'Sarabun', sans-serif;
+  font-family: 'Kanit', sans-serif;
 }
 
 .toast {
@@ -113,9 +113,9 @@ body {
      <p class="text-gray-500 text-xs md:text-sm">Material Requisition &amp; Stock Management</p>
     </div>
     <form onsubmit="login(event)" class="space-y-4">
-     <div><label class="block text-sm font-semibold text-gray-700 mb-2">ชื่อผู้ใช้</label> <input id="username" type="text"  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+     <div><label class="block text-sm font-semibold text-gray-700 mb-2">ชื่อผู้ใช้งาน</label> <input id="username" type="text" placeholder="username" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
      </div>
-     <div><label class="block text-sm font-semibold text-gray-700 mb-2">รหัสผ่าน</label> <input id="password" type="password" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
+     <div><label class="block text-sm font-semibold text-gray-700 mb-2">รหัสผ่าน</label> <input id="password" type="password" placeholder="password" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none transition">
      </div><button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition shadow-lg"> 🔐 เข้าสู่ระบบ </button>
     </form>
    </div>
@@ -129,7 +129,7 @@ body {
      <h1 class="text-lg md:text-xl font-bold">ระบบคลังพัสดุ</h1>
      <p class="text-indigo-300 text-xs md:text-sm mt-1">Stock Management System</p>
     </div>
-    <nav class="flex-1 p-4 space-y-2 overflow-y-auto"><button onclick="showSection('addStock')" id="menuAddStock" class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-3 menu-item"> <span class="text-xl">➕</span> <span class="font-medium text-sm md:text-base">เพิ่มสต็อกวัสดุ</span> </button> <button onclick="showSection('requisition')" id="menuRequisition" class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-3 menu-item"> <span class="text-xl">📋</span> <span class="font-medium text-sm md:text-base">เบิกวัสดุ</span> </button> <button onclick="showSection('history')" id="menuHistory" class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-3 menu-item"> <span class="text-xl">📜</span> <span class="font-medium text-sm md:text-base">ประวัติการเบิกวัสดุ</span> </button> <button onclick="showSection('statistics')" id="menuStatistics" class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-3 menu-item"> <span class="text-xl">📊</span> <span class="font-medium text-sm md:text-base">สถิติและรายงาน</span> </button>
+    <nav class="flex-1 p-4 space-y-2 overflow-y-auto"><button onclick="showSection('addStock')" id="menuAddStock" class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-3 menu-item"> <span class="text-xl">📥</span> <span class="font-medium text-sm md:text-base">เพิ่มสต็อกวัสดุ</span> </button> <button onclick="showSection('requisition')" id="menuRequisition" class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-3 menu-item"> <span class="text-xl">📋</span> <span class="font-medium text-sm md:text-base">เบิกวัสดุ</span> </button> <button onclick="showSection('history')" id="menuHistory" class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-3 menu-item"> <span class="text-xl">📜</span> <span class="font-medium text-sm md:text-base">ประวัติการเบิกวัสดุ</span> </button> <button onclick="showSection('statistics')" id="menuStatistics" class="w-full text-left px-4 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-3 menu-item"> <span class="text-xl">📊</span> <span class="font-medium text-sm md:text-base">สถิติและรายงาน</span> </button>
     </nav>
     <div class="p-4 border-t border-indigo-700">
      <div class="bg-indigo-800 rounded-lg p-3 mb-3">
@@ -137,16 +137,19 @@ body {
        ผู้ใช้งานระบบ
       </div>
       <div class="font-semibold text-sm md:text-base">
-       👤 Admin
+       ผู้ดูแลระบบ
       </div>
+     </div>
+     <div id="firebaseStatus" class="text-xs text-indigo-300 mb-3 text-center">
+      🔄 กำลังเชื่อมต่อ Firebase...
      </div><button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 py-3 rounded-lg font-semibold transition shadow-lg text-sm md:text-base"> 🚪 ออกจากระบบ </button>
     </div>
    </aside><!-- Main Content -->
    <main class="flex-1 overflow-y-auto bg-gray-50"><!-- ================= ADD STOCK SECTION ================= -->
     <section id="addStock" class="p-4 md:p-8 section-content">
      <div class="mb-6">
-      <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">➕ เพิ่มสต็อกวัสดุ</h2>
-      <p class="text-gray-600 text-sm md:text-base">เพิ่มวัสดุเข้าคลังพัสดุ</p>
+      <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">📥 เพิ่มสต็อกวัสดุ</h2>
+      <p class="text-gray-600 text-sm md:text-base">เพิ่มวัสดุเข้าสู่คลังพัสดุ</p>
      </div>
      <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 max-w-4xl">
       <form onsubmit="addStock(event)" class="space-y-5">
@@ -171,7 +174,7 @@ body {
           <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base">ชื่อวัสดุ</th>
           <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base">แผนก</th>
           <th class="px-3 md:px-4 py-3 text-center font-semibold text-sm md:text-base">คงเหลือ</th>
-          <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base hidden md:table-cell">วันที่อัพเดท</th>
+          <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base hidden md:table-cell">วันที่อัปเดต</th>
           <th class="px-3 md:px-4 py-3 text-center font-semibold text-sm md:text-base">จัดการ</th>
          </tr>
         </thead>
@@ -236,7 +239,7 @@ body {
           <th class="px-3 md:px-4 py-3 text-center font-semibold text-sm md:text-base">จำนวน</th>
           <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base">วันที่</th>
           <th class="px-3 md:px-4 py-3 text-left font-semibold text-sm md:text-base hidden md:table-cell">เวลา</th>
-          <th class="px-3 md:px-4 py-3 text-center font-semibold text-sm md:text-base">ลบ</th>
+          <th class="px-3 md:px-4 py-3 text-center font-semibold text-sm md:text-base">จัดการ</th>
          </tr>
         </thead>
         <tbody id="historyTableBody" class="divide-y divide-gray-200">
@@ -255,7 +258,7 @@ body {
      </div>
      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <div class="bg-white rounded-xl shadow-lg p-4 md:p-6">
-       <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-4">📉 วัสดุคงเหลือน้อยที่สุด 5 อันดับ</h3>
+       <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-4">⚠️ วัสดุคงเหลือน้อยที่สุด 5 อันดับ</h3>
        <canvas id="lowStockChart"></canvas>
       </div>
       <div class="bg-white rounded-xl shadow-lg p-4 md:p-6">
@@ -311,6 +314,25 @@ body {
      </div>
     </section>
    </main>
+  </div><!-- ================= EDIT STOCK MODAL ================= -->
+  <div id="editStockModal" class="modal">
+   <div class="modal-content">
+    <div class="bg-amber-600 text-white p-4 md:p-6 rounded-t-xl">
+     <h3 class="text-xl md:text-2xl font-bold">✏️ แก้ไขข้อมูลวัสดุ</h3>
+    </div>
+    <div class="p-4 md:p-6">
+     <form onsubmit="confirmEditStock(event)" class="space-y-4">
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">ชื่อวัสดุ</label> <input id="editStockName" type="text" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:outline-none transition">
+      </div>
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">จำนวน</label> <input id="editStockQuantity" type="number" min="0" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:outline-none transition">
+      </div>
+      <div><label class="block text-sm font-semibold text-gray-700 mb-2">แผนก</label> <input id="editStockDepartment" type="text" readonly class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gray-100 cursor-not-allowed">
+      </div>
+      <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3 pt-4"><button type="submit" class="flex-1 bg-amber-600 text-white py-3 rounded-lg font-semibold hover:bg-amber-700 transition"> ✓ บันทึกการแก้ไข </button> <button type="button" onclick="closeEditStockModal()" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition"> ✕ ยกเลิก </button>
+      </div>
+     </form>
+    </div>
+   </div>
   </div><!-- ================= DELETE CONFIRMATION MODAL ================= -->
   <div id="deleteModal" class="modal">
    <div class="modal-content">
@@ -323,31 +345,78 @@ body {
      </div>
     </div>
    </div>
+  </div><!-- ================= RETURN STOCK MODAL ================= -->
+  <div id="returnStockModal" class="modal">
+   <div class="modal-content">
+    <div class="bg-blue-600 text-white p-4 md:p-6 rounded-t-xl">
+     <h3 class="text-xl md:text-2xl font-bold">↩️ คืนวัสดุกลับเข้าสต็อก</h3>
+    </div>
+    <div class="p-4 md:p-6">
+     <p class="text-gray-700 mb-6 text-sm md:text-base" id="returnMessage">คุณต้องการคืนวัสดุนี้กลับเข้าสต็อกใช่หรือไม่?</p>
+     <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+      <p class="text-sm text-blue-800">📌 วัสดุจะถูกเพิ่มกลับเข้าสต็อกและลบออกจากประวัติการเบิก</p>
+     </div>
+     <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3"><button onclick="confirmReturnStock()" class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"> ✓ ยืนยันการคืนสต็อก </button> <button onclick="closeReturnStockModal()" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400 transition"> ✕ ยกเลิก </button>
+     </div>
+    </div>
+   </div>
   </div><!-- ================= FIREBASE & JAVASCRIPT ================= -->
   <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
   import { getDatabase, ref, set, push, onValue, update, get, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
+  // Firebase Configuration
   const firebaseConfig = {
     apiKey: "AIzaSyA3hnlQ_hXg6gDn3EYlFmcIBLoPAiwwt0w",
     authDomain: "requistionsystem-33881.firebaseapp.com",
     databaseURL: "https://requistionsystem-33881-default-rtdb.firebaseio.com",
     projectId: "requistionsystem-33881",
     storageBucket: "requistionsystem-33881.firebasestorage.app",
-    messagingSenderId: "1030474523782",
-    appId: "1:1030474523782:web:fc4bf066a367d9f637dc7b",
+    messagingSenderId: "607877375638",
+    appId: "1:607877375638:web:fc4bf066a367d9f637dc7b",
     measurementId: "G-M3N19WESNP"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+  // Initialize Firebase
+  let app, db;
+  let isFirebaseReady = false;
 
-  window.db = db;
-  window.dbRef = { ref, set, push, onValue, update, get, remove };
+  try {
+    app = initializeApp(firebaseConfig);
+    db = getDatabase(app);
+    isFirebaseReady = true;
+    
+    console.log('✅ Firebase initialized successfully');
+    console.log('Database URL:', firebaseConfig.databaseURL);
+    
+    // Update status
+    const statusEl = document.getElementById('firebaseStatus');
+    if (statusEl) {
+      statusEl.innerHTML = '✅ เชื่อมต่อ Firebase สำเร็จ';
+      statusEl.className = 'text-xs text-green-400 mb-3 text-center';
+    }
+  } catch (error) {
+    console.error('❌ Firebase initialization error:', error);
+    isFirebaseReady = false;
+    
+    const statusEl = document.getElementById('firebaseStatus');
+    if (statusEl) {
+      statusEl.innerHTML = '❌ เชื่อมต่อ Firebase ล้มเหลว';
+      statusEl.className = 'text-xs text-red-400 mb-3 text-center';
+    }
+  }
 
-  // Global variables for delete modal
+  // Make Firebase accessible globally
+  window.firebaseApp = app;
+  window.firebaseDb = db;
+  window.firebaseRef = { ref, set, push, onValue, update, get, remove };
+  window.isFirebaseReady = isFirebaseReady;
+
+  // Global variables
   let deleteTarget = null;
   let deleteType = null;
+  let editStockKey = null;
+  let returnStockData = null;
   let allRequisitions = [];
 
   // Toast notification system
@@ -372,6 +441,12 @@ body {
   // Login function
   window.login = function(event) {
     event.preventDefault();
+    
+    if (!window.isFirebaseReady) {
+      showToast('❌ Firebase ยังไม่พร้อมใช้งาน กรุณารอสักครู่', 'error');
+      return;
+    }
+    
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
@@ -420,6 +495,11 @@ body {
   window.addStock = function(event) {
     event.preventDefault();
     
+    if (!window.isFirebaseReady) {
+      showToast('❌ Firebase ยังไม่พร้อมใช้งาน', 'error');
+      return;
+    }
+    
     const materialName = document.getElementById('stockMaterialName').value.trim();
     const quantity = parseInt(document.getElementById('stockQuantity').value);
     const department = document.getElementById('stockDepartment').value;
@@ -434,9 +514,11 @@ body {
       return;
     }
 
-    const stockRef = window.dbRef.ref(window.db, 'stocks');
+    console.log('🔄 กำลังเพิ่มสต็อก:', { materialName, quantity, department });
+
+    const stockRef = window.firebaseRef.ref(window.firebaseDb, 'stocks');
     
-    window.dbRef.get(stockRef).then((snapshot) => {
+    window.firebaseRef.get(stockRef).then((snapshot) => {
       let existingKey = null;
       
       if (snapshot.exists()) {
@@ -459,38 +541,58 @@ body {
       });
 
       if (existingKey) {
-        const existingRef = window.dbRef.ref(window.db, `stocks/${existingKey}`);
-        window.dbRef.get(existingRef).then((snap) => {
+        console.log('📝 อัพเดทสต็อกเดิม:', existingKey);
+        const existingRef = window.firebaseRef.ref(window.firebaseDb, `stocks/${existingKey}`);
+        window.firebaseRef.get(existingRef).then((snap) => {
           const currentQty = snap.val().quantity || 0;
-          window.dbRef.update(existingRef, {
+          window.firebaseRef.update(existingRef, {
             quantity: currentQty + quantity,
             lastUpdated: timestamp
           }).then(() => {
+            console.log('✅ อัพเดทสต็อกสำเร็จ');
             showToast(`เพิ่มสต็อก "${materialName}" จำนวน ${quantity} รายการสำเร็จ`, 'success');
             event.target.reset();
+          }).catch((error) => {
+            console.error('❌ เกิดข้อผิดพลาดในการอัพเดท:', error);
+            showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
           });
         });
       } else {
-        const newStockRef = window.dbRef.push(stockRef);
-        window.dbRef.set(newStockRef, {
+        console.log('➕ สร้างสต็อกใหม่');
+        const newStockRef = window.firebaseRef.push(stockRef);
+        window.firebaseRef.set(newStockRef, {
           name: materialName,
           quantity: quantity,
           department: department,
           lastUpdated: timestamp
         }).then(() => {
+          console.log('✅ สร้างสต็อกใหม่สำเร็จ');
           showToast(`เพิ่มวัสดุใหม่ "${materialName}" จำนวน ${quantity} รายการสำเร็จ`, 'success');
           event.target.reset();
+        }).catch((error) => {
+          console.error('❌ เกิดข้��ผิดพลาดในการสร้าง:', error);
+          showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
         });
       }
     }).catch((error) => {
+      console.error('❌ เกิดข้อผิดพลาดในการอ่านข้อมูล:', error);
       showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
     });
   };
 
   // Load stock data
   function loadStockData() {
-    const stockRef = window.dbRef.ref(window.db, 'stocks');
-    window.dbRef.onValue(stockRef, (snapshot) => {
+    if (!window.isFirebaseReady) {
+      console.warn('⚠️ Firebase ยังไม่พร้อม');
+      return;
+    }
+
+    console.log('🔄 กำลังโหลดข้อมูลสต็อก...');
+    const stockRef = window.firebaseRef.ref(window.firebaseDb, 'stocks');
+    
+    window.firebaseRef.onValue(stockRef, (snapshot) => {
+      console.log('📊 ได้รับข้อมูลสต็อก:', snapshot.exists());
+      
       const tbody = document.getElementById('stockTableBody');
       tbody.innerHTML = '';
 
@@ -500,6 +602,7 @@ body {
           stocks.push({ key: child.key, ...child.val() });
         });
 
+        console.log('✅ พบสต็อก:', stocks.length, 'รายการ');
         stocks.sort((a, b) => a.name.localeCompare(b.name, 'th'));
 
         stocks.forEach((stock) => {
@@ -514,19 +617,89 @@ body {
             <td class="px-3 md:px-4 py-3 text-center ${qtyClass} text-sm md:text-base">${stock.quantity}</td>
             <td class="px-3 md:px-4 py-3 text-xs md:text-sm text-gray-600 hidden md:table-cell">${stock.lastUpdated}</td>
             <td class="px-3 md:px-4 py-3 text-center">
-              <button onclick="showDeleteStockModal('${stock.key}', '${stock.name.replace(/'/g, "\\'")}', '${stock.department}')" 
-                      class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 md:px-4 md:py-2 rounded-lg font-semibold transition text-xs md:text-sm">
-                🗑️ ลบ
-              </button>
+              <div class="flex flex-col md:flex-row gap-2 justify-center">
+                <button onclick="showEditStockModal('${stock.key}', '${stock.name.replace(/'/g, "\\'")}', ${stock.quantity}, '${stock.department}')" 
+                        class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1 md:px-4 md:py-2 rounded-lg font-semibold transition text-xs md:text-sm">
+                  ✏️ แก้ไข
+                </button>
+                <button onclick="showDeleteStockModal('${stock.key}', '${stock.name.replace(/'/g, "\\'")}', '${stock.department}')" 
+                        class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 md:px-4 md:py-2 rounded-lg font-semibold transition text-xs md:text-sm">
+                  🗑️ ลบ
+                </button>
+              </div>
             </td>
           `;
           tbody.appendChild(row);
         });
       } else {
+        console.log('ℹ️ ยังไม่มีข้อมูลสต็อก');
         tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500 text-sm md:text-base">ยังไม่มีข้อมูลสต็อก</td></tr>';
       }
+    }, (error) => {
+      console.error('❌ เกิดข้อผิดพลาดในการโหลดสต็อก:', error);
+      showToast('ไม่สามารถโหลดข้อมูลสต็อกได้', 'error');
     });
   }
+
+  // Show edit stock modal
+  window.showEditStockModal = function(key, name, quantity, department) {
+    editStockKey = key;
+    document.getElementById('editStockName').value = name;
+    document.getElementById('editStockQuantity').value = quantity;
+    document.getElementById('editStockDepartment').value = department;
+    document.getElementById('editStockModal').style.display = 'block';
+  };
+
+  // Close edit stock modal
+  window.closeEditStockModal = function() {
+    document.getElementById('editStockModal').style.display = 'none';
+    editStockKey = null;
+  };
+
+  // Confirm edit stock
+  window.confirmEditStock = function(event) {
+    event.preventDefault();
+    
+    if (!editStockKey || !window.isFirebaseReady) {
+      showToast('เกิดข้อผิดพลาด', 'error');
+      return;
+    }
+
+    const newName = document.getElementById('editStockName').value.trim();
+    const newQuantity = parseInt(document.getElementById('editStockQuantity').value);
+
+    if (!newName || newQuantity < 0) {
+      showToast('กรุณากรอกข้อมูลให้ถูกต้อง', 'warning');
+      return;
+    }
+
+    console.log('🔄 กำลังแก้ไขสต็อก:', editStockKey);
+
+    const timestamp = new Date().toLocaleString('th-TH', { 
+      timeZone: 'Asia/Bangkok',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+
+    const stockRef = window.firebaseRef.ref(window.firebaseDb, `stocks/${editStockKey}`);
+    
+    window.firebaseRef.update(stockRef, {
+      name: newName,
+      quantity: newQuantity,
+      lastUpdated: timestamp
+    }).then(() => {
+      console.log('✅ แก้ไขสต็อกสำเร็จ');
+      showToast(`แก้ไขข้อมูล "${newName}" สำเร็จ`, 'success');
+      closeEditStockModal();
+    }).catch((error) => {
+      console.error('❌ เกิดข้อผิดพลาด:', error);
+      showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
+    });
+  };
 
   // Show delete stock modal
   window.showDeleteStockModal = function(key, name, department) {
@@ -538,6 +711,11 @@ body {
 
   // Filter materials by department
   window.filterMaterialsByDept = function() {
+    if (!window.isFirebaseReady) {
+      showToast('Firebase ยังไม่พร้อม', 'warning');
+      return;
+    }
+
     const dept = document.getElementById('reqDepartment').value;
     const materialSelect = document.getElementById('reqMaterial');
     materialSelect.innerHTML = '<option value="">-- โปรดรอสักครู่ --</option>';
@@ -550,18 +728,29 @@ body {
       return;
     }
 
-    const stockRef = window.dbRef.ref(window.db, 'stocks');
-    window.dbRef.get(stockRef).then((snapshot) => {
+    console.log('🔍 กำลังกรองวัสดุสำหรับแผนก:', dept);
+
+    const stockRef = window.firebaseRef.ref(window.firebaseDb, 'stocks');
+    window.firebaseRef.get(stockRef).then((snapshot) => {
       materialSelect.innerHTML = '<option value="">-- เลือกวัสดุ --</option>';
       
       if (snapshot.exists()) {
         const materials = [];
         snapshot.forEach((child) => {
           const item = child.val();
-          if (item.department === dept && item.quantity > 0) {
+          console.log('📦 ตรวจสอบ:', item.name, '| แผนก:', item.department, '| ต้องการ:', dept);
+          
+          // เปรียบเทียบแบบไม่สนใจช่องว่างและตัวพิมพ์
+          const itemDept = (item.department || '').trim();
+          const selectedDept = dept.trim();
+          
+          if (itemDept === selectedDept && item.quantity > 0) {
             materials.push({ key: child.key, name: item.name, qty: item.quantity });
+            console.log('✅ ตรงกัน - เพิ่มเข้าลิสต์:', item.name);
           }
         });
+
+        console.log('📋 พบวัสดุทั้งหมด:', materials.length, 'รายการ');
 
         materials.sort((a, b) => a.name.localeCompare(b.name, 'th'));
 
@@ -574,10 +763,15 @@ body {
 
         if (materials.length === 0) {
           materialSelect.innerHTML = '<option value="">-- ไม่มีวัสดุในแผนกนี้ --</option>';
+          console.log('⚠️ ไม่พบวัสดุในแผนกนี้');
         }
       } else {
         materialSelect.innerHTML = '<option value="">-- ไม่มีวัสดุในแผนกนี้ --</option>';
+        console.log('⚠️ ไม่มีข้อมูลสต็อกในระบบ');
       }
+    }).catch((error) => {
+      console.error('❌ เกิดข้อผิดพลาดในการกรอง:', error);
+      showToast('เกิดข้อผิดพลาดในการโหลดวัสดุ', 'error');
     });
   };
 
@@ -591,8 +785,8 @@ body {
       return;
     }
 
-    const stockRef = window.dbRef.ref(window.db, `stocks/${materialKey}`);
-    window.dbRef.get(stockRef).then((snapshot) => {
+    const stockRef = window.firebaseRef.ref(window.firebaseDb, `stocks/${materialKey}`);
+    window.firebaseRef.get(stockRef).then((snapshot) => {
       if (snapshot.exists()) {
         const qty = snapshot.val().quantity;
         const color = qty <= 5 ? 'text-red-600' : 'text-green-600';
@@ -604,6 +798,11 @@ body {
   // Submit requisition
   window.submitRequisition = function(event) {
     event.preventDefault();
+
+    if (!window.isFirebaseReady) {
+      showToast('Firebase ยังไม่พร้อมใช้งาน', 'error');
+      return;
+    }
 
     const requesterName = document.getElementById('requesterName').value.trim();
     const materialKey = document.getElementById('reqMaterial').value;
@@ -619,9 +818,11 @@ body {
       return;
     }
 
-    const stockRef = window.dbRef.ref(window.db, `stocks/${materialKey}`);
+    console.log('🔄 กำลังเบิกวัสดุ:', { requesterName, materialKey, reqQty });
+
+    const stockRef = window.firebaseRef.ref(window.firebaseDb, `stocks/${materialKey}`);
     
-    window.dbRef.get(stockRef).then((snapshot) => {
+    window.firebaseRef.get(stockRef).then((snapshot) => {
       if (!snapshot.exists()) {
         showToast('ไม่พบวัสดุนี้ในระบบ', 'error');
         return;
@@ -638,29 +839,33 @@ body {
       const timestamp = now.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
       const date = now.toLocaleDateString('th-TH');
       const time = now.toLocaleTimeString('th-TH');
-      const isoDate = now.toISOString().split('T')[0]; // For filtering
+      const isoDate = now.toISOString().split('T')[0];
 
-      const historyRef = window.dbRef.ref(window.db, 'requisitions');
-      const newReqRef = window.dbRef.push(historyRef);
+      const historyRef = window.firebaseRef.ref(window.firebaseDb, 'requisitions');
+      const newReqRef = window.firebaseRef.push(historyRef);
       
-      window.dbRef.set(newReqRef, {
+      window.firebaseRef.set(newReqRef, {
         requesterName: requesterName,
         materialName: stock.name,
         department: stock.department,
         quantity: reqQty,
+        stockKey: materialKey,
         date: date,
         time: time,
         timestamp: timestamp,
         isoDate: isoDate
       }).then(() => {
-        return window.dbRef.update(stockRef, {
+        console.log('✅ บันทึกประวัติการเบิกสำเร็จ');
+        return window.firebaseRef.update(stockRef, {
           quantity: stock.quantity - reqQty,
           lastUpdated: timestamp
         });
       }).then(() => {
+        console.log('✅ อัพเดทสต็อกสำเร็จ');
         showToast(`เบิกวัสดุ "${stock.name}" จำนวน ${reqQty} รายการสำเร็จ`, 'success');
         clearRequisitionForm();
       }).catch((error) => {
+        console.error('❌ เกิดข้อผิดพลาด:', error);
         showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
       });
     });
@@ -677,17 +882,32 @@ body {
 
   // Load requisition history
   function loadRequisitionHistory() {
-    const historyRef = window.dbRef.ref(window.db, 'requisitions');
-    window.dbRef.onValue(historyRef, (snapshot) => {
+    if (!window.isFirebaseReady) {
+      console.warn('⚠️ Firebase ยังไม่พร้อม');
+      return;
+    }
+
+    console.log('🔄 กำลังโหลดประวัติการเบิก...');
+    const historyRef = window.firebaseRef.ref(window.firebaseDb, 'requisitions');
+    
+    window.firebaseRef.onValue(historyRef, (snapshot) => {
+      console.log('📊 ได้รับข้อมูลประวัติ:', snapshot.exists());
+      
       allRequisitions = [];
       
       if (snapshot.exists()) {
         snapshot.forEach((child) => {
           allRequisitions.push({ key: child.key, ...child.val() });
         });
+        console.log('✅ พบประวัติ:', allRequisitions.length, 'รายการ');
+      } else {
+        console.log('ℹ️ ยังไม่มีประวัติการเบิก');
       }
       
       displayRequisitions(allRequisitions);
+    }, (error) => {
+      console.error('❌ เกิดข้อผิดพลาดในการโหลดประวัติ:', error);
+      showToast('ไม่สามารถโหลดประวัติการเบิกได้', 'error');
     });
   }
 
@@ -710,10 +930,16 @@ body {
           <td class="px-3 md:px-4 py-3 text-xs md:text-sm">${req.date}</td>
           <td class="px-3 md:px-4 py-3 text-xs md:text-sm hidden md:table-cell">${req.time}</td>
           <td class="px-3 md:px-4 py-3 text-center">
-            <button onclick="showDeleteHistoryModal('${req.key}', '${req.materialName.replace(/'/g, "\\'")}', '${req.requesterName.replace(/'/g, "\\'")}', '${req.date}')" 
-                    class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 md:px-3 md:py-1 rounded-lg font-semibold transition text-xs md:text-sm">
-              🗑️
-            </button>
+            <div class="flex flex-col md:flex-row gap-2 justify-center">
+              <button onclick='window.showReturnStockModal(${JSON.stringify(req)})' 
+                      class="return-btn bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 md:px-3 md:py-1 rounded-lg font-semibold transition text-xs md:text-sm">
+                ↩️ คืน
+              </button>
+              <button onclick="showDeleteHistoryModal('${req.key}', '${req.materialName.replace(/'/g, "\\'")}', '${req.requesterName.replace(/'/g, "\\'")}', '${req.date}')" 
+                      class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 md:px-3 md:py-1 rounded-lg font-semibold transition text-xs md:text-sm">
+                🗑️ ลบ
+              </button>
+            </div>
           </td>
         `;
         tbody.appendChild(row);
@@ -723,13 +949,190 @@ body {
     }
   }
 
+  // Show return stock modal
+  window.showReturnStockModal = function(reqData) {
+    console.log('📋 ข้อมูลการคืนสต็อก:', reqData);
+    returnStockData = reqData;
+    document.getElementById('returnMessage').innerHTML = `
+      คุณต้องการคืนวัสดุ "<strong>${reqData.materialName}</strong>" จำนวน <strong>${reqData.quantity}</strong> รายการ (แผนก: <strong>${reqData.department}</strong>) กลับเข้าสต็อกใช่หรือไม่?
+    `;
+    document.getElementById('returnStockModal').style.display = 'block';
+  };
+
+  // Close return stock modal
+  window.closeReturnStockModal = function() {
+    document.getElementById('returnStockModal').style.display = 'none';
+    returnStockData = null;
+    
+    // รีเซ็ตปุ่มคืนโมดอลให้กลับมาเป็นปกติ
+    const confirmBtn = document.querySelector('#returnStockModal button[onclick="confirmReturnStock()"]');
+    const cancelBtn = document.querySelector('#returnStockModal button[onclick="closeReturnStockModal()"]');
+    
+    if (confirmBtn) {
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = '✓ ยืนยันการคืนสต็อก';
+      confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+    
+    if (cancelBtn) {
+      cancelBtn.disabled = false;
+      cancelBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+    
+    // เปิดปุ่มคืนค่าทั้งหมดใหม่
+    const allReturnButtons = document.querySelectorAll('.return-btn');
+    allReturnButtons.forEach(btn => {
+      btn.disabled = false;
+      btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    });
+  };
+
+  // Confirm return stock
+  window.confirmReturnStock = function() {
+    if (!returnStockData || !window.isFirebaseReady) {
+      showToast('เกิดข้อผิดพลาด', 'error');
+      closeReturnStockModal();
+      return;
+    }
+
+    // ปิดการใช้งานปุ่มในโมดอล
+    const confirmBtn = document.querySelector('#returnStockModal button[onclick="confirmReturnStock()"]');
+    const cancelBtn = document.querySelector('#returnStockModal button[onclick="closeReturnStockModal()"]');
+    
+    if (confirmBtn) {
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = '⏳ กำลังประมวลผล...';
+      confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+    
+    if (cancelBtn) {
+      cancelBtn.disabled = true;
+      cancelBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+
+    // ปิดปุ่มคืนค่าทั้งหมดในตาราง
+    const allReturnButtons = document.querySelectorAll('.return-btn');
+    allReturnButtons.forEach(btn => {
+      btn.disabled = true;
+      btn.classList.add('opacity-50', 'cursor-not-allowed');
+    });
+
+    console.log('🔄 กำลังคืนสต็อก:', returnStockData);
+
+    let stockKey = returnStockData.stockKey;
+    const reqKey = returnStockData.key;
+    const returnQty = returnStockData.quantity;
+    const materialName = returnStockData.materialName;
+    const department = returnStockData.department;
+
+    const timestamp = new Date().toLocaleString('th-TH', { 
+      timeZone: 'Asia/Bangkok',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+
+    // ถ้าไม่มี stockKey ให้ค้นหาจากชื่อ��ัสดุแ��ะแผนก
+    const findAndReturnStock = () => {
+      if (stockKey) {
+        // มี stockKey ให้ใช้ตรงๆ
+        const stockRef = window.firebaseRef.ref(window.firebaseDb, `stocks/${stockKey}`);
+        return window.firebaseRef.get(stockRef).then((snapshot) => {
+          if (snapshot.exists()) {
+            return { key: stockKey, stock: snapshot.val() };
+          } else {
+            // stockKey ไม่ถูกต้อง ให้ค้นหาใหม่
+            return findStockByNameAndDept();
+          }
+        });
+      } else {
+        // ไม่มี stockKey ให้ค้นหา
+        return findStockByNameAndDept();
+      }
+    };
+
+    const findStockByNameAndDept = () => {
+      console.log('🔍 ค้นหาสต็อกจาก:', { materialName, department });
+      const stocksRef = window.firebaseRef.ref(window.firebaseDb, 'stocks');
+      return window.firebaseRef.get(stocksRef).then((snapshot) => {
+        if (!snapshot.exists()) {
+          throw new Error('ไม่พบข้อมูลสต็อกในระบบ');
+        }
+
+        let foundKey = null;
+        let foundStock = null;
+
+        snapshot.forEach((child) => {
+          const stock = child.val();
+          if (stock.name === materialName && stock.department === department) {
+            foundKey = child.key;
+            foundStock = stock;
+          }
+        });
+
+        if (!foundKey) {
+          throw new Error(`ไม่พบวัสดุ "${materialName}" ในแผนก "${department}"`);
+        }
+
+        console.log('✅ พบสต็อกที่ตรงกัน:', foundKey);
+        return { key: foundKey, stock: foundStock };
+      });
+    };
+
+    findAndReturnStock().then((result) => {
+      const targetStockKey = result.key;
+      const currentStock = result.stock;
+      const newQuantity = currentStock.quantity + returnQty;
+
+      console.log('🔄 อัพเดทสต็อก:', { currentQty: currentStock.quantity, returnQty, newQty: newQuantity });
+
+      const stockRef = window.firebaseRef.ref(window.firebaseDb, `stocks/${targetStockKey}`);
+      return window.firebaseRef.update(stockRef, {
+        quantity: newQuantity,
+        lastUpdated: timestamp
+      });
+    }).then(() => {
+      console.log('✅ อัพเดทสต็อกสำเร็จ');
+      const reqRef = window.firebaseRef.ref(window.firebaseDb, `requisitions/${reqKey}`);
+      return window.firebaseRef.remove(reqRef);
+    }).then(() => {
+      console.log('✅ ลบประวัติการเบิกสำเร็จ');
+      showToast(`คืนวัสดุ "${materialName}" จำนวน ${returnQty} รายการสำเร็จ`, 'success');
+      closeReturnStockModal();
+    }).catch((error) => {
+      console.error('❌ เกิดข้อผิดพลาด:', error);
+      showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
+      
+      // เปิดปุ่มใหม่ในกรณีเกิดข้อผิดพลาด
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = '✓ ยืนยันการคืนสต็อก';
+        confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+      
+      if (cancelBtn) {
+        cancelBtn.disabled = false;
+        cancelBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+      
+      const allReturnButtons = document.querySelectorAll('.return-btn');
+      allReturnButtons.forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      });
+    });
+  };
+
   // Filter history
   window.filterHistory = function() {
     const startDate = document.getElementById('filterStartDate').value;
     const endDate = document.getElementById('filterEndDate').value;
 
     if (!startDate || !endDate) {
-      showToast('กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด', 'warning');
+      showToast('กรุณาเลือกวันที่เริ่มต้นแล้วสิ้นสุด', 'warning');
       return;
     }
 
@@ -767,20 +1170,32 @@ body {
   window.confirmDelete = function() {
     if (!deleteTarget || !deleteType) return;
 
+    if (!window.isFirebaseReady) {
+      showToast('Firebase ยังไม่พร้อมใช้งาน', 'error');
+      closeDeleteModal();
+      return;
+    }
+
+    console.log('🔄 กำลังลบ:', deleteType, deleteTarget);
+
     if (deleteType === 'stock') {
-      const stockRef = window.dbRef.ref(window.db, `stocks/${deleteTarget}`);
-      window.dbRef.remove(stockRef).then(() => {
+      const stockRef = window.firebaseRef.ref(window.firebaseDb, `stocks/${deleteTarget}`);
+      window.firebaseRef.remove(stockRef).then(() => {
+        console.log('✅ ลบสต็อกสำเร็จ');
         showToast('ลบวัสดุสำเร็จ', 'success');
         closeDeleteModal();
       }).catch((error) => {
+        console.error('❌ เกิดข้อผิดพลาด:', error);
         showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
       });
     } else if (deleteType === 'history') {
-      const historyRef = window.dbRef.ref(window.db, `requisitions/${deleteTarget}`);
-      window.dbRef.remove(historyRef).then(() => {
+      const historyRef = window.firebaseRef.ref(window.firebaseDb, `requisitions/${deleteTarget}`);
+      window.firebaseRef.remove(historyRef).then(() => {
+        console.log('✅ ลบประวัติสำเร็จ');
         showToast('ลบประวัติการเบิกสำเร็จ', 'success');
         closeDeleteModal();
       }).catch((error) => {
+        console.error('❌ เกิดข้อผิดพลาด:', error);
         showToast('เกิดข้อผิดพลาด: ' + error.message, 'error');
       });
     }
@@ -856,12 +1271,17 @@ body {
   let mostReqChart = null;
 
   window.updateStatistics = function() {
-    const stockRef = window.dbRef.ref(window.db, 'stocks');
-    const reqRef = window.dbRef.ref(window.db, 'requisitions');
+    if (!window.isFirebaseReady) {
+      showToast('Firebase ยังไม่พร้อม', 'warning');
+      return;
+    }
+
+    const stockRef = window.firebaseRef.ref(window.firebaseDb, 'stocks');
+    const reqRef = window.firebaseRef.ref(window.firebaseDb, 'requisitions');
 
     Promise.all([
-      window.dbRef.get(stockRef),
-      window.dbRef.get(reqRef)
+      window.firebaseRef.get(stockRef),
+      window.firebaseRef.get(reqRef)
     ]).then(([stockSnapshot, reqSnapshot]) => {
       // Total materials
       let totalMaterials = 0;
@@ -962,19 +1382,31 @@ body {
           }
         }
       });
+    }).catch((error) => {
+      console.error('❌ เกิดข้อผิดพลาดในการโหลดสถิติ:', error);
+      showToast('ไม่สามารถโหลดสถิติได้', 'error');
     });
   };
 
   // Load all data on init
   function loadAllData() {
+    console.log('🔄 เริ่มโหลดข้อมูลทั้งหมด');
     loadStockData();
     loadRequisitionHistory();
   }
 
-  // Initialize on page load
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('Firebase initialized successfully');
-  });
+  // Test Firebase connection
+  console.log('🧪 ทดสอบการเชื่อมต่อ Firebase...');
+  if (window.isFirebaseReady) {
+    const testRef = window.firebaseRef.ref(window.firebaseDb, '.info/connected');
+    window.firebaseRef.onValue(testRef, (snap) => {
+      if (snap.val() === true) {
+        console.log('✅ เชื่อมต่อ Firebase Realtime Database สำเร็จ');
+      } else {
+        console.log('⚠️ ไม่สามารถเชื่อมต่อ Firebase Realtime Database');
+      }
+    });
+  }
 </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9baa9a5951e9894d',t:'MTc2Nzg2Mzg1OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c56b0cf25dc8957',t:'MTc2OTY2ODMyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
